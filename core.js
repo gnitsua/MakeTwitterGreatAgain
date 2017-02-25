@@ -6,63 +6,73 @@
 * using the twitter stream API. 
 */
 
-var hashMap = require('hashmap');
 var Twitter = require('twitter');
 var http = require('http');
+var express = require('express');
+var app = express();
+var path    = require("path");
+
+
+app.use('/static', express.static('public'));
+
+app.get('/',function(req,res){
+	res.sendFile(path.join(__dirname+'/index.html'));
+});
 
 //These keys are tied w/ the CS275_Group1 accont and are needed to access the api
 var twitter = new Twitter({
-consumer_key: 'p7Rn3R9I37sbNJEFOSl58nXOv',
-consumer_secret: 'x8M8A63ow9mN3vM9TTaTEhtKywizMrxpNqWeN8QMT8jHfAk6AV',
-access_token_key: '833706426908475394-dclzYhhk0t6ZRMRpboj2bYnF7lvHAzy',
-access_token_secret: 'tYtMO29K7wuJOtFhc9rYioFnX7DmWdJPFvKIaIiFSiq6j'
+	consumer_key: 'p7Rn3R9I37sbNJEFOSl58nXOv',
+	consumer_secret: 'x8M8A63ow9mN3vM9TTaTEhtKywizMrxpNqWeN8QMT8jHfAk6AV',
+	access_token_key: '833706426908475394-dclzYhhk0t6ZRMRpboj2bYnF7lvHAzy',
+	access_token_secret: 'tYtMO29K7wuJOtFhc9rYioFnX7DmWdJPFvKIaIiFSiq6j'
 });
 
-var params = {screen_name: 'CS275_Group1'};
 var testID = '';
 var userIDS = [];
 var tweetArray = [];
 var tweetIDArray = [];
-var map = new hashMap();
 
 //This gets all tweets from the client w/ associated ID
-twitter.get('statuses/user_timeline',params,function(error,tweets,response){
-	if(!error){
-		console.log('Connection established...retrieving tweets');
-		var length = tweets.length;
-		for(var i = 0; i < length; i++){
-			tweetArray[i] =tweets[i].text; // This stores the actual tweet text
-			tweetIDArray[i]=tweets[i].id_str; // This stores the associated tweet ID
-		}
+// twitter.get('statuses/user_timeline','CS275_Group1',function(error,tweets,response){
+// 	if(!error){
+// 		console.log('Connection established...retrieving tweets');
+// 		var length = tweets.length;
+// 		for(var i = 0; i < length; i++){
+// 			tweetArray[i] =tweets[i].text; // This stores the actual tweet text
+// 			tweetIDArray[i]=tweets[i].id_str; // This stores the associated tweet ID
+// 		}
 		
-		console.log('Getting replies to tweet: ' + tweetArray[0] + ' ' + tweetIDArray[0]);
-		twitter.get('search/tweets.json?q='+tweetIDArray[0]+'&count=100',function(error2,tweets2,response2){
-				if(!error){
-					var length = tweets2.statuses.length;
-					for(var i = 0; i < length; i++){
-						console.log(tweets2.statuses[i].quoted_status_id_str);
-						console.log(tweets2.statuses[i].id_str);
-						console.log(tweets2.statuses[i].text); // get text of replies
-					}
-				}
-		});
-		
-		
-		
-		console.log('Getting replies to tweet: ' + tweetArray[1] + ' ' + tweetIDArray[1]);
-		twitter.get('search/tweets.json?q='+tweetIDArray[1]+'&count=100',function(error2,tweets2,response2){
-				if(!error){
-					var length = tweets2.statuses.length;
-					for(var i = 0; i < length; i++){
-						console.log(tweets2.statuses[i].text);
-					}
-				}
-		});
+// 		console.log('Getting replies to tweet: ' + tweetArray[0] + ' ' + tweetIDArray[0]);
+// 		twitter.get('search/tweets.json?q='+tweetIDArray[0]+'&count=100',function(error2,tweets2,response2){
+// 				if(!error){
+// 					var length = tweets2.statuses.length;
+// 					for(var i = 0; i < length; i++){
+// 						console.log(tweets2.statuses[i].quoted_status_id_str);
+// 						console.log(tweets2.statuses[i].id_str);
+// 						console.log(tweets2.statuses[i].text); // get text of replies
+// 					}
+// 				}
+// 		});
 		
 		
-	}
-});
+		
+// 		console.log('Getting replies to tweet: ' + tweetArray[1] + ' ' + tweetIDArray[1]);
+// 		twitter.get('search/tweets.json?q='+tweetIDArray[1]+'&count=100',function(error2,tweets2,response2){
+// 				if(!error){
+// 					var length = tweets2.statuses.length;
+// 					for(var i = 0; i < length; i++){
+// 						console.log(tweets2.statuses[i].text);
+// 					}
+// 				}
+// 		});
+		
+		
+// 	}
+// });
 
+app.listen(8080,function(){
+	console.log("Server Running…");
+});
 
 
 //This returns comments with an @tag.
