@@ -9,47 +9,59 @@
   <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script src="/path/to/jquery.easy-pie-chart.js"></script>
   <style>
-  body {
-      font: 20px Montserrat, sans-serif;
-      line-height: 1.8;
-      color: #f5f6f7;
-  }
-  p {font-size: 16px;}
-  .margin {margin-bottom: 45px;}
-  .bg-1 { 
-      background-color: #ff0000; /* Red */
-      color: #ffffff;
-  }
-  .bg-2 { 
-      background-color: #474e5d; /* Dark Blue */
-      color: #ffffff;
-  }
-  .bg-3 { 
-      background-color: #ffffff; /* White */
-      color: #555555;
-  }
-  .bg-4 { 
-      background-color: #2f2f2f; /* Black Gray */
-      color: #fff;
-  }
-  .container-fluid {
-      padding-top: 70px;
-      padding-bottom: 70px;
-  }
-  .navbar {
-      padding-top: 15px;
-      padding-bottom: 15px;
-      border: 0;
-      border-radius: 0;
-      margin-bottom: 0;
-      font-size: 12px;
-      letter-spacing: 5px;
-  }
-  .navbar-nav  li a:hover {
-      color: #1abc9c !important;
-  }
+      body {
+          font: 20px Montserrat, sans-serif;
+          line-height: 1.8;
+          color: #f5f6f7;
+          border: 45px solid white;
+      }
+      p {font-size: 16px;}
+      .margin {margin-bottom: 45px;}
+      .bg-1 { 
+          background-color: #ff0000; /* Red */
+          color: #ffffff;
+      }
+      .bg-2 { 
+          background-color: #474e5d; /* Dark Blue */
+          color: #ffffff;
+      }
+      .bg-3 { 
+          background-color: #ffffff; /* White */
+          color: #555555;
+      }
+      .bg-4 { 
+          background-color: #2f2f2f; /* Black Gray */
+          color: #fff;
+      }
+      .container-fluid {
+          padding-top: 70px;
+          padding-bottom: 70px;
+      }
+      .navbar {
+          padding-top: 15px;
+          padding-bottom: 15px;
+          border: 0;
+          border-radius: 0;
+          margin-bottom: 0;
+          font-size: 12px;
+          letter-spacing: 5px;
+      }
+      .navbar-nav  li a:hover {
+          color: #1abc9c !important;
+      }
   </style>
+  <script>
+      $(function () {
+        $('.min-chart#char-sales').easyPieChart({
+            barColor: '#4caf50',
+            conStep: function(from, to, percent){
+                $(this.el).find('.percent').text(Math.round(percent))
+            }
+        });
+      });
+  </script>
 </head>
 <body>
 
@@ -82,36 +94,38 @@
 </div>
 
 <!-- Second Container -->
-<div class="container-fluid bg-2 text-center" id="retweets">
+<div class="container-fluid bg-2 text-center">
   <h3 class="margin">Retweets</h3>
-  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. </p>
-  <a href="#" class="btn btn-default btn-lg">
-    <span class="glyphicon glyphicon-search"></span> Search
-  </a>
+  <div id="retweets"></div>
 </div>
 
 <!-- Third Container (Grid) -->
 <div class="container-fluid bg-3 text-center">    
-  <h3 class="margin">Where To Find Me?</h3><br>
+  <h3 class="margin">Results</h3><br>
   <div class="row">
     <div class="col-sm-4">
-      <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-      <img src="birds1.jpg" class="img-responsive margin" style="width:100%" alt="Image">
+      <h5>Positive Tweets</h4>
+      <div id="pos-tweets"></div>
     </div>
     <div class="col-sm-4"> 
-      <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-      <img src="birds2.jpg" class="img-responsive margin" style="width:100%" alt="Image">
+		<h4>Graph</h4>
+		<div id="graph">
+            <div class="text-center">
+                <span class="min-chart" id="chart-sales" data-percent="56"> <span class="percent"></span> </span>
+                <h5><span class="label green"> Sales <i class="fa fa-arrow-circle-up"></i></span></h5>
+            </div>
+        </div>
     </div>
-    <div class="col-sm-4"> 
-      <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-      <img src="birds3.jpg" class="img-responsive margin" style="width:100%" alt="Image">
-    </div>
+    <div class="col-sm-4">
+      <h4>Negative Tweets</h4>
+      <div id="neg-tweets"></div>
+      </div>
   </div>
 </div>
 
 <!-- Footer -->
 <footer class="container-fluid bg-4 text-center">
-  <p>Bootstrap Theme Made By <a href="https://www.w3schools.com">www.w3schools.com</a></p> 
+  <p>Project Made By Austin Gentry, Vraj Patel, Justin Petrecz, and Brandon Tran</p> 
 </footer>
 
 </body>
