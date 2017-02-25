@@ -9,47 +9,59 @@
   <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script src="/path/to/jquery.easy-pie-chart.js"></script>
   <style>
-  body {
-      font: 20px Montserrat, sans-serif;
-      line-height: 1.8;
-      color: #f5f6f7;
-  }
-  p {font-size: 16px;}
-  .margin {margin-bottom: 45px;}
-  .bg-1 { 
-      background-color: #ff0000; /* Red */
-      color: #ffffff;
-  }
-  .bg-2 { 
-      background-color: #474e5d; /* Dark Blue */
-      color: #ffffff;
-  }
-  .bg-3 { 
-      background-color: #ffffff; /* White */
-      color: #555555;
-  }
-  .bg-4 { 
-      background-color: #2f2f2f; /* Black Gray */
-      color: #fff;
-  }
-  .container-fluid {
-      padding-top: 70px;
-      padding-bottom: 70px;
-  }
-  .navbar {
-      padding-top: 15px;
-      padding-bottom: 15px;
-      border: 0;
-      border-radius: 0;
-      margin-bottom: 0;
-      font-size: 12px;
-      letter-spacing: 5px;
-  }
-  .navbar-nav  li a:hover {
-      color: #1abc9c !important;
-  }
+      body {
+          font: 20px Montserrat, sans-serif;
+          line-height: 1.8;
+          color: #f5f6f7;
+          border: 45px solid white;
+      }
+      p {font-size: 16px;}
+      .margin {margin-bottom: 45px;}
+      .bg-1 { 
+          background-color: #ff0000; /* Red */
+          color: #ffffff;
+      }
+      .bg-2 { 
+          background-color: #474e5d; /* Dark Blue */
+          color: #ffffff;
+      }
+      .bg-3 { 
+          background-color: #ffffff; /* White */
+          color: #555555;
+      }
+      .bg-4 { 
+          background-color: #2f2f2f; /* Black Gray */
+          color: #fff;
+      }
+      .container-fluid {
+          padding-top: 70px;
+          padding-bottom: 70px;
+      }
+      .navbar {
+          padding-top: 15px;
+          padding-bottom: 15px;
+          border: 0;
+          border-radius: 0;
+          margin-bottom: 0;
+          font-size: 12px;
+          letter-spacing: 5px;
+      }
+      .navbar-nav  li a:hover {
+          color: #1abc9c !important;
+      }
   </style>
+  <script>
+      $(function () {
+        $('.min-chart#char-sales').easyPieChart({
+            barColor: '#4caf50',
+            conStep: function(from, to, percent){
+                $(this.el).find('.percent').text(Math.round(percent))
+            }
+        });
+      });
+  </script>
 </head>
 <body>
 
@@ -98,12 +110,16 @@
     <div class="col-sm-4"> 
 		<h4>Graph</h4>
 		<div id="graph">
-		</div>
+            <div class="text-center">
+                <span class="min-chart" id="chart-sales" data-percent="56"> <span class="percent"></span> </span>
+                <h5><span class="label green"> Sales <i class="fa fa-arrow-circle-up"></i></span></h5>
+            </div>
+        </div>
     </div>
-    <div class="col-sm-4"> 
+    <div class="col-sm-4">
       <h4>Negative Tweets</h4>
       <div id="neg-tweets"></div>
-    </div>
+      </div>
   </div>
 </div>
 
