@@ -12,6 +12,7 @@ var express = require('express');
 var app = express();
 var path    = require("path");
 var CronJob = require('cron').CronJob;
+var sentiment = require('sentiment');
 
 var Database = require('./Database');
 var database = new Database();
@@ -61,21 +62,24 @@ var checkTrump = new CronJob('* 00 * * * *', function() {
   'America/New_York' /* Time zone of this job. */
 );
 
-var checkForReplies = new CronJob('00 */10 * * * *', function() {
+var checkForReplies = new CronJob('00 */5 * * * *', function() {
   /*
    * Runs every 10 minutes
    */
    var params = {screen_name: 'realDonaldTrump'};
-   twitter.get('search/tweets.json?q=to:realDonaldTrump&count=10',params,function(error,tweets,response){
+   twitter.get('search/tweets.json?q=to:realDonaldTrump&count=100',params,function(error,tweets,response){
 		if(!error){
 			var length = tweets.statuses.length;
 			console.log("got tweets:" + length);
 			for(var i = 0; i < length; i++){
 				if(tweets.statuses[i].in_reply_to_status_id!==null){
 					var cleanedTweet =  tweets.statuses[i].text.replace(/[^A-Za-z 0-9 \.,\?""!@#\$%\^&\*\(\)-_=\+;:<>\/\\\|\}\{\[\]`~]*/g, '');
+					var extraCleanTweet = cleanedTweet.replace(/[#|@][a-zA-Z]+/g,"");
+					var r1 = sentiment(extraCleanTweet);
 					var tweet = {tweet_id:tweets.statuses[i].id,
 								trump_tweet_id:tweets.statuses[i].in_reply_to_status_id,
-								text:cleanedTweet};
+								text:cleanedTweet,
+								sed:r1["score"]};
 					(function(scopedTweet){
 					database.select('replies','tweet_id='+scopedTweet["tweet_id"],null,null,function(row){
 							if(row.length == 0){//this means we don't have this tweet in the db
