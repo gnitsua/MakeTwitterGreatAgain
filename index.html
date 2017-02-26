@@ -17,9 +17,9 @@
 							$(document).ready(function(){
 								var percent = getPercentPositive()
 								var s = "<div class='progress'>" +
-								"<div class='progress-bar progress-bar-success' role='progressbar' style='width:" + percent + "%'>" +
+								"<div class='progress-bar progress-red' role='progressbar' style='width:" + percent + "%'>" +
 								"</div>" +
-								"<div class='progress-bar progress-bar-danger' role='progressbar' style='width:" + (100 - percent) + "%'>" +
+								"<div class='progress-bar progress-bar-primary' role='progressbar' style='width:" + (100 - percent) + "%'>" +
 								"</div>" +
 								"</div>"
 	
@@ -106,6 +106,9 @@
 							height: 75px;
 							border: 3px solid #000000
 						}
+                        .progress-red {
+                            background-color: #ff0000;
+                        }
                     </style>
                         
     </head>
@@ -151,14 +154,12 @@
             <div class="row">
                 <div class="col-sm-12">
                     <h4><b> Summary </b></h5>
-                        <div id="graph">
-                        </div>
-                        </div>
+                    </br>
+                    <div id="graph">
+                    </div>
+                </div>
             </div>
-        </div>
-        <!-- Third Container (Grid) -->
-        <div class="container-fluid bg-3 text-center">
-            <h4 class="margin">Very, Very, Tremendous Info</h4><br>
+            </br>
             <div class="row">
                 <div class="col-sm-6">
                     <h4><b> Positive Tweets </b></h4>
