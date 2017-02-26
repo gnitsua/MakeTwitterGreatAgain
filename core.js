@@ -25,7 +25,7 @@ var twitter = new Twitter({
 	access_token_secret: 'tYtMO29K7wuJOtFhc9rYioFnX7DmWdJPFvKIaIiFSiq6j'
 });
 
-var checkTrump = new CronJob('* 00 * * * *', function() {
+var checkTrump = new CronJob('00 * * * * *', function() {
   /*
    * Runs every hour at 00:00
    */
@@ -107,7 +107,7 @@ var checkForReplies = new CronJob('00 */5 * * * *', function() {
   'America/New_York' /* Time zone of this job. */
 );
 
-var calculateAverage = new CronJob('00 * * * * *', function() {
+var calculateAverage = new CronJob('00 */10 * * * *', function() {
   /*
    * Runs every 10 minutes
    */
