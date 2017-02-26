@@ -14,7 +14,7 @@
 								return 42;
 							} 
  
-							$( document ).ready(function() {
+							$(document).ready(function(){
 								var percent = getPercentPositive()
 								var s = "<div class='progress'>" +
 								"<div class='progress-bar progress-bar-success' role='progressbar' style='width:" + percent + "%'>" +
@@ -25,6 +25,28 @@
 	
 								document.getElementById("graph").innerHTML = s
 							});
+							
+							$(document).ready(function(){
+								$.ajax({
+									type: "GET",
+									url: "http://localhost:8080/trumpTweet?page=1"
+									contentType: "application/json; charset=utf-8",
+									data: "{}",
+									dataType: "html",
+					
+									success: function(msg) {
+										document.getElementById("result").innerHTML = msg[0];
+									},
+					
+									error: function (xhr, ajaxOptions, thrownError) {
+										document.getElementById("result").innerHTML = "Error fetching: " + URL;
+									}
+								});
+								
+								document.getElementById("graph").innerHTML = s
+							});
+							
+							
                             </script>
                         <style>
                             body {
