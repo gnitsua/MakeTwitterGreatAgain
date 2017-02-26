@@ -1,0 +1,55 @@
+-- MySQL dump 10.13  Distrib 5.7.17, for Linux (x86_64)
+--
+-- Host: localhost    Database: twitter
+-- ------------------------------------------------------
+-- Server version	5.7.17-0ubuntu0.16.04.1
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `replies`
+--
+
+DROP TABLE IF EXISTS `replies`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `replies` (
+  `replies_id` int(11) NOT NULL AUTO_INCREMENT,
+  `tweet_id` bigint(20) NOT NULL,
+  `trump_tweet_id` bigint(20) NOT NULL,
+  `text` varchar(200) NOT NULL,
+  `sed` float DEFAULT NULL,
+  `sed_training` float DEFAULT NULL,
+  PRIMARY KEY (`replies_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=541 DEFAULT CHARSET=latin1 COMMENT='latin1_swedish_ci';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `replies`
+--
+
+LOCK TABLES `replies` WRITE;
+/*!40000 ALTER TABLE `replies` DISABLE KEYS */;
+INSERT INTO `replies` VALUES (484,835668784157442000,835465719970218000,'@realDonaldTrump at which trailer park though? tough planning!',NULL,NULL),(485,835668783834476500,835608648625836000,'@realDonaldTrump Bwack bwack bwack! Chicken! Coward! Wimp! Afraid to face people smarter than you in public, Pres. Snowflake? What a pussy!',NULL,NULL),(486,835668783133933600,835608648625836000,'@realDonaldTrump hehehaha there are some great comments below.',NULL,NULL),(487,835668774217003000,835608648625836000,'@realDonaldTrump',NULL,NULL),(488,835668772740530200,835325771858251800,'@realDonaldTrump @nytimes @CNN',NULL,NULL),(489,835668769959600100,835608648625836000,'@realDonaldTrump Could you be any more of a coward?',NULL,NULL),(490,835668767015387100,835481237879926800,'@realDonaldTrump Tax breaks for the rich. That helps the little guy NOT',NULL,NULL),(491,835668765924798500,835610917568200700,'@realDonaldTrump impressive backhand',NULL,NULL),(492,835668764700119000,835610917568200700,'@realDonaldTrump if you would pay $0.35 more in the future it should be applicable for healthcare free healthcare for America',NULL,NULL),(493,835668763190120400,835608648625836000,'@realDonaldTrump It is not about Republican or Democrat it is working to unify the country and you are NOT even trying!',NULL,NULL),(494,835669078261915600,834377364947816400,'@realDonaldTrump Another tip Donald. On some topics, silence can be a more useful tool? No wood being thrown on the fire.Hang in there!',NULL,NULL),(495,835669077066674200,835608648625836000,'@realDonaldTrump Oh whatever.....nobody cares. Itll be much better than with your misery infecting the place.',NULL,NULL),(496,835669076647235600,835608648625836000,'@realDonaldTrump President Bannon wouldnt sign your permission slip? SAD!',NULL,NULL),(497,835669074269126700,835325771858251800,'@realDonaldTrump @nytimes @CNN FAKE TRUMP',NULL,NULL),(498,835669071869902800,835608648625836000,'@realDonaldTrump Bannon told you that you couldnt go??? Aww thats a shame because YOURE not scared of the press are you?',NULL,NULL),(499,835669071534284800,835608648625836000,'@realDonaldTrump If you cant stand the heat, get the fuck out of the kitchen. #WeakPOTUS',NULL,NULL),(500,835669071391834100,835608648625836000,'@realDonaldTrump Seriously?   https://t.co/m3vNgFpepu',NULL,NULL),(501,835669068753567700,835325771858251800,'@realDonaldTrump @VinnyMMA @nytimes @CNN your brain bounced around that skull too many times Vinny.',NULL,NULL),(502,835669067486871600,835610917568200700,'@realDonaldTrump https://t.co/NaqBBdXvsI',NULL,NULL),(503,835669163096092700,835608648625836000,'@realDonaldTrump President Obama has 85 MILLION followers, AND attended these things because he wasnt a scared pussy.',NULL,NULL),(504,835669162311626800,835479283699224600,'@realDonaldTrump Thanks Obama!',NULL,NULL),(505,835669161065984000,835608648625836000,'@realDonaldTrump Good call. You wont be missed. Now people can relax and have fun.',NULL,NULL),(506,835669160977891300,835608648625836000,'@realDonaldTrump pussy',NULL,NULL),(507,835669160680050700,835608648625836000,'@realDonaldTrump Just keep hiding behind your white privilege, hate others based on fear, your own ignorance &amp; lack of Human decency!',NULL,NULL),(508,835669159459586000,835608648625836000,'@realDonaldTrump oh FFS. Youre gonna defeat ISIS but youre scared of a room of journalists? Really?',NULL,NULL),(509,835669156892561400,835479283699224600,'@realDonaldTrump what a stupid comparison. Apples and oranges.',NULL,NULL),(510,835669154472542200,835173525522624500,'@realDonaldTrump @AP Interesting. Wasnt there a lawsuit filed against you  by a certain underage girl? What happened to her? Paid off?.',NULL,NULL),(511,835669144129302500,835608648625836000,'@realDonaldTrump Oh, baby boy Donny. Are they too mean in the real world? https://t.co/YX8cdv9q8p',NULL,NULL),(512,835673275992784900,833686030679208000,'@realDonaldTrump once youre impeached, yeah.',NULL,NULL),(513,835673275942461400,835610917568200700,'@realDonaldTrump Here you are, uniting the country, only as our commander in chaos can!',NULL,NULL),(514,835673274512089100,835608648625836000,'@realDonaldTrump @POTUS You are a coward and a demigogue. Oops. Word is too bigly for you. I mean, fascist narcissist',NULL,NULL),(515,835673273656610800,835479283699224600,'@realDonaldTrump',NULL,NULL),(516,835673270171144200,835608648625836000,'@realDonaldTrump coward!',NULL,NULL),(517,835673264898904000,835608648625836000,'@realDonaldTrump A little afraid of what you may hear, huh?Coward!',NULL,NULL),(518,835673371350298600,835608648625836000,'@realDonaldTrump of course you wont.  We expect no less from such a small human being. You are a disgrace to Republicans. #GOPagainstTrump',NULL,NULL),(519,835673370972864500,835608648625836000,'@realDonaldTrump just playing a little golf again and sittin round the tv with a bucket of kfc?',NULL,NULL),(520,835673365440520200,835608648625836000,'.@realDonaldTrump were you invited?',NULL,NULL),(521,835673364123484200,835553050530099200,'@realDonaldTrump @WhiteHouse the weekly address is so funny @nbcsnl &amp; all other weekly shows better worry ...',NULL,NULL),(522,835673357567868900,835610917568200700,'@realDonaldTrump now go back to your nearly all white cabinet and Party while the dems have enough real diversity you racist pos',NULL,NULL),(523,835673357332983800,835124485632180200,'@realDonaldTrump stay there, and send in your resignation. No need to return to the white house!',NULL,NULL),(524,835673348394856400,835608648625836000,'@realDonaldTrump hooray, thank God, youd ruin the whole evening, U have no sense of humor, youd soil the white napkins with orange make-up',NULL,NULL),(525,835675686526414800,835608648625836000,'@realDonaldTrump bock bock bock',NULL,NULL),(526,835675686329200600,835608648625836000,'@realDonaldTrump  He was afraid they were going to boycott, so got in first paranoid much. Have to #impeach now he is blocking the media',NULL,NULL),(527,835675679907684400,835608648625836000,'@realDonaldTrump no one wants you there.',NULL,NULL),(528,835675679077220400,835325771858251800,'@realDonaldTrump @nytimes @CNN 45, cut it out. #republicanparty voters will be holding you responsible for 45s actions.',NULL,NULL),(529,835675671284363300,835465719970218000,'@realDonaldTrump How bout them tax returns you promised us?',NULL,NULL),(530,835675670495789000,835608648625836000,'@realDonaldTrump We understand. Satire can be cruel. Maybe you should go to bed early and avoid TV or the internet.',NULL,NULL),(531,835675667698090000,835608648625836000,'@realDonaldTrump Did you notice how excited the bystanders were to see Barack in NYC yesterday?  Youll never experience that.  Sad.',NULL,NULL),(532,835675655949979600,835608648625836000,'@realDonaldTrump dont bully people if you cant take it back. #goldenrule',NULL,NULL),(533,835678199531114500,835465719970218000,'@realDonaldTrump I wondered how one person could be so full of crap-then realized with your ego, there is room for even more. Sad.',NULL,NULL),(534,835678197802946600,835610917568200700,'@realDonaldTrump Why are you such a dick?',NULL,NULL),(535,835678197165539300,835325771858251800,'@realDonaldTrump @nytimes @CNN Your continuing harassment of the press is whats sad.',NULL,NULL),(536,835678195831603200,835124485632180200,'@realDonaldTrump Did you wave your little Trump Russian Flag?....',NULL,NULL),(537,835678195827552300,835608648625836000,'@realDonaldTrump They didnt invite you. Heard that a couple of days ago. People are saying....',NULL,NULL),(538,835678192690204700,835465719970218000,'@realDonaldTrump and we would still out number you. #45 you were Selected not Elected. And we dont like you',NULL,NULL),(539,835678192207859700,835608648625836000,'@realDonaldTrump unite?  Weve never been so separated as a country.',NULL,NULL),(540,835678191641477100,835481237879926800,'@realDonaldTrump Ignore the media for now &amp; concentrate on filling law &amp; order judges &amp; court vacancies! Important!',NULL,NULL);
+/*!40000 ALTER TABLE `replies` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2017-02-25 21:43:20

@@ -1,0 +1,54 @@
+-- MySQL dump 10.13  Distrib 5.7.17, for Linux (x86_64)
+--
+-- Host: localhost    Database: twitter
+-- ------------------------------------------------------
+-- Server version	5.7.17-0ubuntu0.16.04.1
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `trump`
+--
+
+DROP TABLE IF EXISTS `trump`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `trump` (
+  `trump_id` int(11) NOT NULL AUTO_INCREMENT,
+  `tweet_id` bigint(20) NOT NULL,
+  `text` varchar(200) NOT NULL,
+  `sed` float DEFAULT NULL,
+  `sed_training` float DEFAULT NULL,
+  PRIMARY KEY (`trump_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=61 DEFAULT CHARSET=latin1 COMMENT='latin1_swedish_ci';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `trump`
+--
+
+LOCK TABLES `trump` WRITE;
+/*!40000 ALTER TABLE `trump` DISABLE KEYS */;
+INSERT INTO `trump` VALUES (41,835610917568200700,'Congratulations to Thomas Perez, who has just been named Chairman of the DNC. I could not be happier for him, or for the Republican Party!',NULL,NULL),(42,835608648625836000,'I will not be attending the White House Correspondents\' Association Dinner this year. Please wish everyone well and have a great evening!',NULL,NULL),(43,835553050530099200,'Weekly Address from @WhiteHouse: https://t.co/uaoQSHBOQB https://t.co/7eF6aC6kEC',NULL,NULL),(44,835481237879926800,'Great optimism for future of U.S. business, AND JOBS, with the DOW having an 11th straight record close. Big tax &amp; regulation cuts coming!',NULL,NULL),(45,835479283699224600,'The media has not reported that the National Debt in my first month went down by $12 billion vs a $200 billion increase in Obama first mo.',NULL,NULL),(46,835465719970218000,'Maybe the millions of people who voted to MAKE AMERICA GREAT AGAIN should have their own rally. It would be the biggest of them all!',NULL,NULL),(47,835325771858251800,'FAKE NEWS media knowingly doesn\'t tell the truth. A great danger to our country. The failing @nytimes has become a joke. Likewise @CNN. Sad!',NULL,NULL),(48,835173525522624500,'Trump vows to fight \'epidemic\' of human trafficking \nhttps://t.co/oDLZ2NdrtA',NULL,NULL),(49,835124485632180200,'Going to CPAC!',NULL,NULL),(50,835106143462703100,'find the leakers within the FBI itself. Classified information is being given to media that could have a devastating effect on U.S. FIND NOW',NULL,NULL),(51,835104946034991100,'The FBI is totally unable to stop the national security \"leakers\" that have permeated our government for a long time. They can\'t even......',NULL,NULL),(52,834917440450609200,'Big interview tonight by Henry Kravis at The Business Council of Washington. Looking forward to it!',NULL,NULL),(53,834916167177371600,'Seven people shot and killed yesterday in Chicago. What is going on there - totally out of control. Chicago needs help!',NULL,NULL),(54,834899071982841900,'\'S&amp;P 500 Edges Higher After Trump Renews Jobs Pledge\' https://t.co/WtrRJVFmvU',NULL,NULL),(55,834384982495940600,'Very much enjoyed my tour of the Smithsonian\'s National Museum of African American History and Culture...A great job done by amazing people!',NULL,NULL),(56,834377364947816400,'One thing I will say about Rep. Keith Ellison, in his fight to lead the DNC, is that he was the one who predicted early that I would win!',NULL,NULL),(57,834181712783560700,'The so-called angry crowds in home districts of some Republicans are actually, in numerous cases, planned out by liberal activists. Sad!',NULL,NULL),(58,834142323881685000,'\'Americans overwhelmingly oppose sanctuary cities\' https://t.co/s5QvsJWA6u',NULL,NULL),(59,833838311315763200,'Congratulations to our new National Security Advisor, General H.R. McMaster. Video: https://t.co/BKn9r225Kk https://t.co/VBXcJ1b6Pv',NULL,NULL),(60,833783438922629100,'Just named General H.R. McMaster National Security Advisor.',NULL,NULL);
+/*!40000 ALTER TABLE `trump` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2017-02-25 21:43:53
