@@ -13,8 +13,9 @@ function Database(){
 			if(limit1 === null && limit2 === null){
 				con.query('SELECT * FROM '+table,function(err,rows){
 	  				if(err){
-	  					console.log("error selecting from database")
-	  					console.log(err)
+	  					console.log("error selecting from database");
+	  					console.log(err);
+	  					callback();
 	  				}
 	  				else{
 	  					callback(rows);
@@ -25,8 +26,9 @@ function Database(){
 				console.log(limit1+':'+limit2)
 				con.query('SELECT * FROM '+table+' LIMIT '+limit1+','+limit2,function(err,rows){
 		  			if(err){
-		  				console.log("error selecting from database")
-		  				console.log(err)
+		  				console.log("error selecting from database");
+		  				console.log(err);
+		  				callback();
 		  			}
 		  			else{
 		  				callback(rows);
@@ -39,7 +41,8 @@ function Database(){
 				con.query('SELECT * FROM '+table+' WHERE '+ where,function(err,rows){
 		  			if(err){
 		  				console.log("error selecting from database")
-		  				console.log(err)
+		  				console.log(err);
+		  				callback();
 		  			}
 		  			else{
 		  				callback(rows);
@@ -48,10 +51,12 @@ function Database(){
 			}
 			else{
 				if(limit1 !== null && limit2 !== null){
+					console.log('SELECT * FROM '+table+' WHERE '+ where+' LIMIT '+limit1+','+limit2)
 					con.query('SELECT * FROM '+table+' WHERE '+ where+' LIMIT '+limit1+','+limit2,function(err,rows){
 		  				if(err){
 		  					console.log("error selecting from database")
-		  					console.log(err)
+		  					console.log(err);
+		  					callback();
 		  				}
 		  				else{
 		  					callback(rows);
@@ -64,6 +69,11 @@ function Database(){
 				}
 			}
 		}
+		con.end(function(err) {
+		  // The connection is terminated gracefully
+		  // Ensures all previously enqueued queries are still
+		  // before sending a COM_QUIT packet to the MySQL server.
+		});
 	};
 	Database.prototype.insert = function(table,data) {
 		var con = mysql.createConnection({
@@ -77,6 +87,11 @@ function Database(){
 		con.query('INSERT INTO '+table+' SET ?', data, function(err,res){
   			if(err) throw err;
 			console.log('Last insert ID:', res.insertId);
+		});
+		con.end(function(err) {
+		  // The connection is terminated gracefully
+		  // Ensures all previously enqueued queries are still
+		  // before sending a COM_QUIT packet to the MySQL server.
 		});
 	};
 }

@@ -30,6 +30,7 @@ var checkTrump = new CronJob('* 00 * * * *', function() {
    */
 	var params = {screen_name: 'realDonaldTrump'};
 
+
 	twitter.get('statuses/user_timeline',params,function(error,tweets,response){
 		if(!error){
 			console.log('Connection established...retrieving tweets');
@@ -60,6 +61,48 @@ var checkTrump = new CronJob('* 00 * * * *', function() {
   'America/New_York' /* Time zone of this job. */
 );
 
+var checkForReplies = new CronJob('* */10 * * * *', function() {
+  /*
+   * Runs every 10 minutes
+   */
+   var params = {screen_name: 'realDonaldTrump'};
+   twitter.get('search/tweets.json?q=to:realDonaldTrump&count=10',params,function(error,tweets,response){
+		if(!error){
+			var length = tweets.statuses.length;
+			console.log("got tweets:" + length);
+			for(var i = 0; i < length; i++){
+				if(tweets.statuses[i].in_reply_to_status_id!==null){
+					var cleanedTweet =  tweets.statuses[i].text.replace(/[^A-Za-z 0-9 \.,\?""!@#\$%\^&\*\(\)-_=\+;:<>\/\\\|\}\{\[\]`~]*/g, '');
+					var tweet = {tweet_id:tweets.statuses[i].id,
+								trump_tweet_id:tweets.statuses[i].in_reply_to_status_id,
+								text:cleanedTweet};
+					(function(scopedTweet){
+					database.select('replies','tweet_id='+scopedTweet["tweet_id"],null,null,function(row){
+							if(row.length == 0){//this means we don't have this tweet in the db
+								database.insert('replies',scopedTweet);
+								//console.log(scopedTweet)
+							}
+							else{
+								console.log("Already added this tweet");
+							}
+						});
+					})(tweet);
+				}
+			}
+			//console.log(tweets);
+		}
+		else{
+			console.log("twitter error");
+			console.log(error)
+		}
+	});
+  }, function () {
+    /* This function is executed when the job stops */
+  },
+  true, /* Start the job right now */
+  'America/New_York' /* Time zone of this job. */
+);
+
 app.use('/static', express.static('public'));
 
 app.get('/',function(req,res){
@@ -79,98 +122,19 @@ app.get('/trumpTweet',function(req,res){
 	}
 });
 
-
-//This gets all tweets from the client w/ associated ID
-// twitter.get('statuses/user_timeline','CS275_Group1',function(error,tweets,response){
-// 	if(!error){
-// 		console.log('Connection established...retrieving tweets');
-// 		var length = tweets.length;
-// 		for(var i = 0; i < length; i++){
-// 			tweetArray[i] =tweets[i].text; // This stores the actual tweet text
-// 			tweetIDArray[i]=tweets[i].id_str; // This stores the associated tweet ID
-// 		}
-		
-// 		console.log('Getting replies to tweet: ' + tweetArray[0] + ' ' + tweetIDArray[0]);
-// 		twitter.get('search/tweets.json?q='+tweetIDArray[0]+'&count=100',function(error2,tweets2,response2){
-// 				if(!error){
-// 					var length = tweets2.statuses.length;
-// 					for(var i = 0; i < length; i++){
-// 						console.log(tweets2.statuses[i].quoted_status_id_str);
-// 						console.log(tweets2.statuses[i].id_str);
-// 						console.log(tweets2.statuses[i].text); // get text of replies
-// 					}
-// 				}
-// 		});
-		
-		
-		
-// 		console.log('Getting replies to tweet: ' + tweetArray[1] + ' ' + tweetIDArray[1]);
-// 		twitter.get('search/tweets.json?q='+tweetIDArray[1]+'&count=100',function(error2,tweets2,response2){
-// 				if(!error){
-// 					var length = tweets2.statuses.length;
-// 					for(var i = 0; i < length; i++){
-// 						console.log(tweets2.statuses[i].text);
-// 					}
-// 				}
-// 		});
-		
-		
-// 	}
-// });
+app.get('/replies',function(req,res){
+	if(isNaN(req.query.page)==false){
+		limit1 = (parseInt(req.query.page)-1)*10;
+		limit2 = 10;
+		database.select('replies',"trump_tweet_id="+req.query.tweet_id,limit1,limit2,function(row){
+			res.send(row);
+		});
+	}
+	else{
+		res.send({error:"invalid request"});
+	}
+});
 
 app.listen(8080,function(){
 	console.log("Server Running…");
 });
-
-
-//This returns comments with an @tag.
-/*
-twitter.get('https://api.twitter.com/1.1/search/tweets.json?q=to:cs275_group1',function(error,data,response){
-	if(!error){
-		console.log('Found messages!');
-		console.log(data);
-		}
-	});
-	*/
-
-	
-	
-
-
-//This returns retweets, without any comment
-/*
-twitter.get('statuses/user_timeline', params, function(error, tweets, response) {
- if (!error) {
-	 console.log('Connection established...pulling tweets');
-	 var length = tweets.length;
-	 var testString = tweets[0].text;
-	 testID = tweets[0].id_str;
-	 console.log(tweets);
-	 console.log(length);
-	 console.log(testString);
-	 console.log('Getting retweets of ' + testID);
-	 
-	 twitter.get('statuses/retweeters/ids.json?id='+testID+'&stringify_ids=true',function(error2,data,response){
-		if(!error2){
-			console.log('Found retweets of: ' + testString);
-			var testID2 = data.ids[0];
-			console.log(testID2);
-			console.log(data);
-			
-			twitter.get('users/lookup.json?user_id='+testID2,function(error3,data2,response){
-				console.log('Found user!');
-				console.log(data2);
-			});
-		} else {
-			console.log('Error in getting retweets!');
-			console.log(error2);
-		}
-	});
-	
-	} else {
-	console.log(error);
-	}
-});
-
-*/
-
