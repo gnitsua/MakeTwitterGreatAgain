@@ -13,7 +13,10 @@
 							function getPercentPositive(){
 								return 42;
 							} 
- 
+                        function aboutMe() {
+                            var string = "The aim of this project was to incorporate machine learning semantic analysis on a Twitter account or any social media platform that relies on a textual medium of conversion. We chose to do Twitter because current events led us to wonder the overall opinion of the web on President Donald Trump's tweets. His tweets have a widespread influence on the world and are read by thousands of people each day so learning about the consensus on his tweets can help mold the opinions of others."
+                            document.getElementById("container1").innerHTML = string;
+                        }
 							$(document).ready(function(){
 								var percent = getPercentPositive()
 								var s = "<div class='progress'>" +
@@ -22,8 +25,7 @@
 								"<div class='progress-bar progress-bar-primary' role='progressbar' style='width:" + (100 - percent) + "%'>" +
 								"</div>" +
 								"</div>"
-	
-								document.getElementById("graph").innerHTML = s
+                                document.getElementById("graph").innerHTML = s;
 							});
 							
 							$(document).ready(function(){
@@ -52,70 +54,80 @@
                             body {
                                 font: 20px Montserrat, sans-serif;
                                 line-height: 1.8;
-                                color: #f5f6f7;
+                                color: #CAD4CE;
                                 border: 45px solid white;
                             }
-                        p {font-size: 16px;}
-                        .margin {margin-bottom: 20px;}
-                        .bg-1 {
-                            background-color: #ff0000; /* Red */
-                            color: #ffffff;
-                        }
-                        .bg-2 {
-                            background-color: #474e5d; /* Dark Blue */
-                            color: #ffffff;
-                        }
-                        .bg-3 {
-                            background-color: #ffffff; /* White */
-                            color: #555555;
-                        }
-                        .bg-4 {
-                            background-color: #2f2f2f; /* Black Gray */
-                            color: #fff;
-                        }
-                        .container-fluid {
-                            padding-top: 70px;
-                            padding-bottom: 70px;
-                        }
-                        .navbar {
-                            padding-top: 15px;
-                            padding-bottom: 15px;
-                            border: 0;
-                            border-radius: 0;
-                            margin-bottom: 0;
-                            font-size: 12px;
-                            letter-spacing: 5px;
-                        }
-                        .navbar-nav  li a:hover {
-                            color: #1abc9c !important;
-                        }
-                        
-                        #container1 h3 a:link {
-							color: #777777;
-							background-color: transparent;
-                            text-decoration: none;
-						}
-  
-						#container1 h3 a:hover {
-							color: #1abc9c;
-							background-color: transparent;
-							text-decoration: none;
-						}
-						
-						.progress {
-							height: 75px;
-							border: 3px solid #000000
-						}
-                        .progress-red {
-                            background-color: #ff0000;
-                        }
-                        .panel-red {
-                            background-color: #ff0000;
-                        }
-                        img.resize{
-                            width:50%;
-                            height:50%;
-                        }
+                            p {font-size: 16px;}
+                            .margin {margin-bottom: 20px;}
+                            .bg-1 {
+                                background-color: #FF4F42; /* Red */
+                                color: #ffffff;
+                            }
+                            .bg-2 {
+                                background-color: #474e5d; /* Dark Blue */
+                                color: #ffffff;
+                            }
+                            .bg-3 {
+                                background-color: #ffffff; /* White */
+                                color: #555555;
+                            }
+                            .bg-4 {
+                                background-color: #2f2f2f; /* Black Gray */
+                                color: #fff;
+                            }
+                            .container-fluid {
+                                padding-top: 70px;
+                                padding-bottom: 70px;
+                            }
+                            .navbar {
+                                padding-top: 15px;
+                                padding-bottom: 15px;
+                                border: 0;
+                                border-radius: 0;
+                                margin-bottom: 0;
+                                font-size: 12px;
+                                letter-spacing: 5px;
+                            }
+                            .navbar-nav  li a:hover {
+                                color: #1abc9c !important;
+                            }
+                            
+                            #container1 h3 a:link {
+                                color: #777777;
+                                background-color: transparent;
+                                text-decoration: none;
+                            }
+      
+                            #container1 h3 a:hover {
+                                color: #1abc9c;
+                                background-color: transparent;
+                                text-decoration: none;
+                            }
+                            
+                            .progress {
+                                height: 75px;
+                                border: 3px solid #000000;
+                            }
+                            .progress-red {
+                                background-color: #ff4f42;
+                            }
+                            img.resize{
+                                width:50%;
+                                height:50%;
+                            }
+                            .panel-success .panel-heading {
+                                background-color: #ff4f42;
+                                color: white;
+                            }
+                            .panel-success .panel-title {
+                                color: white;
+                            }
+                            .panel-success .panel-body {
+                                color: black;
+                            }
+                            .panel-primary .panel-body {
+                                color: black;
+                            }
                     </style>
                         
     </head>
@@ -134,8 +146,7 @@
                 </div>
                 <div class="collapse navbar-collapse" id="myNavbar">
                     <ul class="nav navbar-nav navbar-right">
-                        <li><a href="#">HELP ME!</a></li>
-                        <li><a href="#">ABOUT</a></li>
+                        <li><a href="#" onclick="aboutMe()">ABOUT</a></li>
                     </ul>
                 </div>
             </div>
@@ -143,14 +154,13 @@
         
         <!-- First Container -->
         <div class="container-fluid bg-1 text-center" id="container1">
-            <h3 class="margin"><a href="#retweets">Look at My Retweets</a></h3>
             <img src="http://49.media.tumblr.com/3a70f0cb0a934cf8684e5822cead95c7/tumblr_o3ko2kKZfX1s2wlrxo1_540.gif" class="img-responsive img-circle margin" style="display:inline" width="350" height="350">
                 <div id="tweet"><h4>"Anyone who thinks my story is anywhere near over is sadly mistaken."</h4></div>
-                <h5><i> - Donald Trump </i></h5>
+                <h5><i> - @realDonaldTrump via Twitter </i></h5>
         </div>
 
         <!-- Second Container (Grid) -->
-        <div class="container-fluid bg-3 text-center">
+        <div class="container-fluid bg-2 text-center">
             <h3 class="margin">Retweets</h3><br>
             <div class="row">
                 <div class="col-sm-12">
@@ -162,7 +172,7 @@
             <div class="row">
                 <div class="col-sm-6">
                     <h4><b> Positive Tweets </b></h4>
-                    <div class="panel panel-red">
+                    <div class="panel panel-success">
                         <div class="panel-heading">Panel with panel-primary class</div>
                         <div class="panel-body">Panel Content</div>
                     </div>
@@ -180,7 +190,7 @@
         </div>
         
         <!-- Footer -->
-        <footer class="container-fluid bg-2 text-center">
+        <footer class="container-fluid bg-3 text-center">
             <p>Project Made By: Austin Gentry, Vraj Patel, Justin Petrecz, and Brandon Tran</p>
         </footer>
         
