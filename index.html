@@ -10,15 +10,21 @@
                         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
                         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
                         <script>
-                            $( document ).ready(function() {
-                                                var percent = Math.floor(Math.random * 101)
-                                                var s = "<h4>Basic Progress Bar</h4>" +
-                                                "<div class='progress'>" +
-                                                "<div class='progress-bar progress-bar-primary' role='progressbar' aria-valuenow='" + percent + "' aria-valuemin='0' aria-valuemax='100' style='width:"+percent+"%'></div>" +"<div class='progress-bar progress-bar-danger' role='progressbar' aria-valuenow='" + (100 - percent) + "' aria-valuemin='0' aria-valuemax='100' style='width:"+ (100 - percent)+"%'>" +
-                                                "</div>" +
-                                                "</div>"
-                                                document.getElementById("graph").innerHTML = s
-                                                });
+							function getPercentPositive(){
+								return 42;
+							} 
+ 
+							$( document ).ready(function() {
+								var percent = getPercentPositive()
+								var s = "<div class='progress'>" +
+								"<div class='progress-bar progress-bar-success' role='progressbar' style='width:" + percent + "%'>" +
+								"</div>" +
+								"<div class='progress-bar progress-bar-danger' role='progressbar' style='width:" + (100 - percent) + "%'>" +
+								"</div>" +
+								"</div>"
+	
+								document.getElementById("graph").innerHTML = s
+							});
                             </script>
                         <style>
                             body {
@@ -62,8 +68,23 @@
                             color: #1abc9c !important;
                         }
                         
-                        
-                            </style>
+                        #container1 h3 a:link {
+							color: #777777;
+							background-color: transparent;
+							text-decoration: none;
+						}
+  
+						#container1 h3 a:hover {
+							color: #1abc9c;
+							background-color: transparent;
+							text-decoration: none;
+						}
+						
+						.progress {
+							height: 75px;
+							border: 3px solid #000000
+						}
+                    </style>
                         
     </head>
     <body>
@@ -89,7 +110,7 @@
         </nav>
         
         <!-- First Container -->
-        <div class="container-fluid bg-1 text-center">
+        <div class="container-fluid bg-1 text-center" id="container1">
             <h3 class="margin"><a href="#retweets">Look at My Retweets</a></h3>
             <img src="http://49.media.tumblr.com/3a70f0cb0a934cf8684e5822cead95c7/tumblr_o3ko2kKZfX1s2wlrxo1_540.gif" class="img-responsive img-circle margin" style="display:inline" alt="Bird" width="350" height="350">
                 <h4>"Anyone who thinks my story is anywhere near over is sadly mistaken."</h4>

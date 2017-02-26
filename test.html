@@ -1,0 +1,139 @@
+<html>
+<head>
+	<!-- Theme Made By www.w3schools.com - No Copyright -->
+  <title>Test Page</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+	<script>
+		$(document).ready(function(){
+			var tweet = "<h1>I'm a Placeholder!!!</h1>"
+			//get tweet somehow
+			document.getElementById("tweet").innerHTML = tweet
+		});
+	
+		function processTweet(isPositive){
+			if(isPositive){
+				//add to positive tweets in db
+				alert("Positive!")
+			}
+				
+			else {
+				//add to negative tweets in db
+				alert("Negative!")
+			}
+		}
+	
+	</script>
+	<style>
+  body {
+      font: 20px Montserrat, sans-serif;
+      line-height: 1.8;
+      color: #f5f6f7;
+  }
+  p {font-size: 16px;}
+  .margin {margin-bottom: 45px;}
+  .bg-1 { 
+      background-color: #ff0000; /* Red */
+      color: #ffffff;
+  }
+  .bg-2 { 
+      background-color: #474e5d; /* Dark Blue */
+      color: #ffffff;
+  }
+  .bg-3 { 
+      background-color: #ffffff; /* White */
+      color: #555555;
+  }
+  .bg-4 { 
+      background-color: #2f2f2f; /* Black Gray */
+      color: #fff;
+  }
+  .container-fluid {
+      padding-top: 70px;
+      padding-bottom: 70px;
+  }
+  .navbar {
+      padding-top: 15px;
+      padding-bottom: 15px;
+      border: 0;
+      border-radius: 0;
+      margin-bottom: 0;
+      font-size: 12px;
+      letter-spacing: 5px;
+  }
+  .navbar-nav  li a:hover {
+      color: #1abc9c !important;
+  }
+  
+  #container1 h3 a:link {
+		color: #777777;
+		background-color: transparent;
+		text-decoration: none;
+  }
+  
+  #container1 h3 a:hover {
+		color: #1abc9c;
+		background-color: transparent;
+		text-decoration: none;
+  }
+  </style>
+</head>
+<body>
+<!-- Navbar -->
+<nav class="navbar navbar-default">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>                        
+      </button>
+      <a class="navbar-brand" href="#">TRUMP'S GREAT TWEETS</a>
+    </div>
+    <div class="collapse navbar-collapse" id="myNavbar">
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="#">HELP ME!</a></li>
+        <li><a href="#">ABOUT</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- First Container -->
+<div class="container-fluid bg-1 text-center" id="container1">
+  <h3 class="margin"><a href="#retweets">Look at My Retweets</a></h3>
+  <img src="http://49.media.tumblr.com/3a70f0cb0a934cf8684e5822cead95c7/tumblr_o3ko2kKZfX1s2wlrxo1_540.gif" class="img-responsive img-circle margin" style="display:inline" alt="Bird" width="350" height="350">
+  <h4>"Anyone who thinks my story is anywhere near over is sadly mistaken."</h4>
+  <h5><i> - Donald Trump </i></h5>
+</div>
+
+<!-- Second Container -->
+<div class="container-fluid bg-2 text-center">
+  <h3 class="margin">Sample Tweet</h3>
+  <div id="tweet"></div>
+</div>
+
+<!-- Third Container (Grid) -->
+<div class="container-fluid bg-3 text-center">
+  <h3 class="margin">This Tweet is:</h3><br>
+  <div class="row">
+    <div class="col-sm-6">
+      <button onclick="processTweet(true)">Positive</button>
+    </div>
+    <div class="col-sm-6"> 
+      <button onclick="processTweet(false)">Negative</button>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="container-fluid bg-4 text-center">
+  <p>Project Made By Austin Gentry, Vraj Patel, Justin Petrecz, and Brandon Tran</p> 
+</footer>
+</body>
+</html>
