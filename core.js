@@ -107,6 +107,30 @@ var checkForReplies = new CronJob('00 */5 * * * *', function() {
   'America/New_York' /* Time zone of this job. */
 );
 
+var calculateAverage = new CronJob('00 * * * * *', function() {
+  /*
+   * Runs every 10 minutes
+   */
+	database.select('trump',null,0,10,function(row){
+		for(i=0;i<row.length;i++){
+			database.select('replies',"trump_tweet_id="+row[i].tweet_id,0,100,function(row){
+				sum = 0;
+				for(i=0;i<row.length;i++){
+					sum += row[i].sed;
+				}
+				average = sum*1.0/row.length;
+				database.update('trump','sed='+average,'tweet_id='+row[0].trump_tweet_id);
+				console.log(average);
+			});
+		}
+	});
+  }, function () {
+    /* This function is executed when the job stops */
+  },
+  true, /* Start the job right now */
+  'America/New_York' /* Time zone of this job. */
+);
+
 app.use('/static', express.static('public'));
 
 app.get('/',function(req,res){

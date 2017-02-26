@@ -94,6 +94,26 @@ function Database(){
 		  // before sending a COM_QUIT packet to the MySQL server.
 		});
 	};
+	Database.prototype.update = function(table,set,where) {
+		var con = mysql.createConnection({
+  			host: "localhost",
+  			user: "root",
+  			password: "CS275",
+			database: "twitter"
+		});
+		con.query(
+  			'UPDATE '+table+' SET '+set+' Where '+where,
+  			function (err, result) {
+    			if (err) throw err;
+					console.log('Changed ' + result.changedRows + ' rows');
+ 			 }
+		);
+		con.end(function(err) {
+		  // The connection is terminated gracefully
+		  // Ensures all previously enqueued queries are still
+		  // before sending a COM_QUIT packet to the MySQL server.
+		});
+	};
 }
 
 module.exports = Database;
