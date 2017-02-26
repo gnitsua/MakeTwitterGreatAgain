@@ -83,7 +83,7 @@ function Database(){
 			database: "twitter"
 		});
 		console.log("inserting");
-		console.log(data);
+		//console.log(data);
 		con.query('INSERT INTO '+table+' SET ?', data, function(err,res){
   			if(err) throw err;
 			console.log('Last insert ID:', res.insertId);
