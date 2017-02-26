@@ -47,7 +47,6 @@
 								});
 							});
 							
-							
                             </script>
                         <style>
                             body {
@@ -94,7 +93,7 @@
                         #container1 h3 a:link {
 							color: #777777;
 							background-color: transparent;
-							text-decoration: none;
+                            text-decoration: none;
 						}
   
 						#container1 h3 a:hover {
@@ -109,6 +108,13 @@
 						}
                         .progress-red {
                             background-color: #ff0000;
+                        }
+                        .panel-red {
+                            background-color: #ff0000;
+                        }
+                        img.resize{
+                            width:50%;
+                            height:50%;
                         }
                     </style>
                         
@@ -143,19 +149,17 @@
                 <h5><i> - Donald Trump </i></h5>
         </div>
         
-        <!-- Second Container -->
+        <!--Second Container
         <div class="container-fluid bg-2 text-center">
             <h3 class="margin">Retweets</h3>
             <div id="retweets"></div>
-        </div>
+        </div>-->
         
         <!-- Third Container (Grid) -->
         <div class="container-fluid bg-3 text-center">
-            <h3 class="margin">Results</h3><br>
+            <h3 class="margin">Summary</h3><br>
             <div class="row">
                 <div class="col-sm-12">
-                    <h4><b> Summary </b></h5>
-                    </br>
                     <div id="graph">
                     </div>
                 </div>
@@ -164,17 +168,25 @@
             <div class="row">
                 <div class="col-sm-6">
                     <h4><b> Positive Tweets </b></h4>
+                    <div class="panel panel-red">
+                        <div class="panel-heading">Panel with panel-primary class</div>
+                        <div class="panel-body">Panel Content</div>
+                    </div>
                     <div id="pos-tweets"></div>
                 </div>
                 <div class="col-sm-6">
                     <h4><b> Negative Tweets </b></h4>
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">Panel with panel-primary class</div>
+                        <div class="panel-body">Panel Content</div>
+                    </div>
                     <div id="neg-tweets"></div>
                 </div>
             </div>
         </div>
         
         <!-- Footer -->
-        <footer class="container-fluid bg-4 text-center">
+        <footer class="container-fluid bg-2 text-center">
             <p>Project Made By: Austin Gentry, Vraj Patel, Justin Petrecz, and Brandon Tran</p>
         </footer>
         
