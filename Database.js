@@ -1,11 +1,12 @@
 var mysql = require("mysql");
+require('dotenv').config()
 
 function Database(){
 	Database.prototype.select = function(table,where,limit1,limit2,callback) {
 		var con = mysql.createConnection({
   			host: "localhost",
-  			user: "root",
-  			password: "CS275",
+  			user: process.env.DB_USR,
+  			password: process.env.DB_PASS,
 			database: "twitter"
 		});
 		console.log("select "+where+" from "+table);

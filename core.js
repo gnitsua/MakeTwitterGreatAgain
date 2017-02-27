@@ -13,16 +13,17 @@ var app = express();
 var path    = require("path");
 var CronJob = require('cron').CronJob;
 var sentiment = require('sentiment');
+require('dotenv').config()
 
 var Database = require('./Database');
 var database = new Database();
 
 //These keys are tied w/ the CS275_Group1 accont and are needed to access the api
 var twitter = new Twitter({
-	consumer_key: 'p7Rn3R9I37sbNJEFOSl58nXOv',
-	consumer_secret: 'x8M8A63ow9mN3vM9TTaTEhtKywizMrxpNqWeN8QMT8jHfAk6AV',
-	access_token_key: '833706426908475394-dclzYhhk0t6ZRMRpboj2bYnF7lvHAzy',
-	access_token_secret: 'tYtMO29K7wuJOtFhc9rYioFnX7DmWdJPFvKIaIiFSiq6j'
+	consumer_key: process.env.CONSUMER_KEY,
+	consumer_secret: process.env.CONSUMER_SECRET,
+	access_token_key: process.env.ACCESS_TOKEN_KEY,
+	access_token_secret: process.env.ACCESS_TOKEN_SECRET
 });
 
 var checkTrump = new CronJob('00 * * * * *', function() {
