@@ -16,7 +16,7 @@
                             }
 							
 							$(document).ready(function(){
-								var URL = "http://localhost:8080/trumpTweet?page=1"
+								var URL = "http://127.0.0.1:8080/trumpTweet?page=1"
 
 								$.ajax({
 									type: "GET",
@@ -33,7 +33,7 @@
                                        var s = "<div class='progress'>" + "<div class='progress-bar progress-bar-primary' role='progressbar' style='width:" + percent + "%'>" + percent+"%"+ "</div>" + "<div class='progress-bar progress-red' role='progressbar' style='width:" + (100 - percent) + "%'>" + (100 - percent)+"%"+ "</div>" + "</div>"
                                        document.getElementById("graph").innerHTML = s;
                                        
-                                       var URL2 = "http://localhost:8080/replies?tweet_id="+trump_tweet_id+"&page=1"
+                                       var URL2 = "http://127.0.0.1:8080/replies?tweet_id="+trump_tweet_id+"&page=1"
                                        $.ajax({
                                               type: "GET",
                                               url: URL2,
@@ -62,12 +62,12 @@
                                                   document.getElementById("neg-tweets").innerHTML = strn;
                                               },
                                               error: function (xhr, ajaxOptions, thrownError) {
-                                                  document.getElementById("pos-tweets").innerHTML = "Error fetching: " + URL;
+                                                  document.getElementById("pos-tweets").innerHTML = "Error fetching replies: " + URL;
                                               }
                                       });
                                     },
                                    error: function (xhr, ajaxOptions, thrownError) {
-                                       document.getElementById("pos-tweets").innerHTML = "Error fetching: " + URL;
+                                       document.getElementById("pos-tweets").innerHTML = "Error fetching trump: " + URL;
                                    }
 							    });
                             })
