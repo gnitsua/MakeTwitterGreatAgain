@@ -30,7 +30,7 @@
                                        document.getElementById("tweet").innerHTML = tweet;
                                        trump_tweet_id = msg[0].tweet_id;
                                        var percent = (msg[0].sed)*100;
-                                       var s = "<div class='progress'>" + "<div class='progress-bar progress-red' role='progressbar' style='width:" + percent + "%'>" + percent+"%"+ "</div>" + "<div class='progress-bar progress-bar-primary' role='progressbar' style='width:" + (100 - percent) + "%'>" + (100 - percent)+"%"+ "</div>" + "</div>"
+                                       var s = "<div class='progress'>" + "<div class='progress-bar progress-bar-primary' role='progressbar' style='width:" + percent + "%'>" + percent+"%"+ "</div>" + "<div class='progress-bar progress-red' role='progressbar' style='width:" + (100 - percent) + "%'>" + (100 - percent)+"%"+ "</div>" + "</div>"
                                        document.getElementById("graph").innerHTML = s;
                                        
                                        var URL2 = "http://localhost:8080/replies?tweet_id="+trump_tweet_id+"&page=1"
@@ -46,12 +46,12 @@
                                                   for (i = 0; i < json.length;i++){
                                                       var tweet = msg[i].text
                                                       var val = msg[i].sed
-                                                      if (val > 0 || val == null) {
-                                                           strp += "<div class='panel panel-default'>" + "<div class='panel-heading highlight'>" + "<h4 class='panel-title'> <a class='accordion-toggle' data-toggle='collapse' data-parent='#accordion' href='#collapse"+i+"'> <i class='indicator glyphicon glyphicon-minus'></i> Menu "+i+"</a> </h4> </div>"+"<div id='collapse"+i+"' class='panel-collapse collapse in'> <div class='panel-body'> "+tweet+" </div>" +"</div></div>"
+                                                      if (val >= 0 || val == null) {
+                                                           strp += "<div class='panel panel-primary'>" + "<div class='panel-heading highlight'>" + "<h4 class='panel-title'> <a class='accordion-toggle' data-toggle='collapse' data-parent='#accordion' href='#collapse"+i+"'> <i class='indicator glyphicon glyphicon-minus'></i> Tweet "+(i+1)+"</a> </h4> </div>"+"<div id='collapse"+i+"' class='panel-collapse collapse in'> <div class='panel-body'> "+tweet+" </div>" +"</div></div>"
                                                       
                                                       }
                                                       else if (val < 0) {
-                                                          strn += "<div class='panel panel-default'>" + "<div class='panel-heading highlight'>" + "<h4 class='panel-title'> <a class='accordion-toggle' data-toggle='collapse' data-parent='#accordion' href='#collapse"+i+"'> <i class='indicator glyphicon glyphicon-minus'></i> Menu "+i+"</a> </h4> </div>"+"<div id='collapse"+i+"' class='panel-collapse collapse in'> <div class='panel-body'> "+tweet+" </div>" +"</div></div>"
+                                                          strn += "<div class='panel panel-primary'>" + "<div class='panel-heading highlight' style='background:#ff4f42;'>" + "<h4 class='panel-title'> <a class='accordion-toggle' data-toggle='collapse' data-parent='#accordion' href='#collapse"+i+"'> <i class='indicator glyphicon glyphicon-minus'></i> Tweet "+(i+1)+"</a> </h4> </div>"+"<div id='collapse"+i+"' class='panel-collapse collapse in'> <div class='panel-body'> "+tweet+" </div>" +"</div></div>"
                                               
                                                       }
                                                       else {
@@ -128,7 +128,7 @@
                             
                             .progress {
                                 height: 75px;
-                                border: 3px solid #000000;
+                                border: 1px solid #474e5d;
                             }
                             .progress-red {
                                 background-color: #ff4f42;
@@ -169,18 +169,14 @@
                                 text-decoration: none;
                             }
                             #accordion .highlight {
-                                background:#ff4f42;
+                                
                                 color:white;
                                 transition:background 2s ease;
                             }
-                            .panel .panel-heading {
-                                background: #ff4f42;
-                                color: white;
-                                font-weight: bold;
-                                font-size: 20px;
-                                font-family: verdana
+                            .panel .panel-heading .highlight .negative {
+                                background:#ff4f42;
                             }
-                            .panel .panel-heading:hover {
+                        .panel .panel-heading:hover {
                                 background: grey;
                                 color: white;
                             }
@@ -229,18 +225,14 @@
                 <div>
                     <div style="width: 50%;float:left" class="panel-group" id="accordion">
                         <h4><b> Positive Tweets </b></h4>
-                        <div id="pos-tweets">
+                        <div id="pos-tweets" style="width:80%;margin-left:auto;margin-right:auto;">
                         </div>
                     </div>
                 </div>
                 <div>
-                    <!--<div class="panel panel-primary">
-                        <div class="panel-heading">Panel with panel-primary class</div>
-                        <div class="panel-body" id="negative"></div>
-                    </div>-->
                     <div style="width: 49%;float:right" class="panel-group" id="accordion2">
                         <h4><b> Negative Tweets </b></h4>
-                        <div id="neg-tweets">
+                        <div id="neg-tweets" style="width:80%;margin-left:auto;margin-right:auto;">
                         </div>
                     </div>
                 </div>

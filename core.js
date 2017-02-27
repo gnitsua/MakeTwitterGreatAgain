@@ -76,7 +76,11 @@ var checkForReplies = new CronJob('00 */5 * * * *', function() {
 				if(tweets.statuses[i].in_reply_to_status_id!==null){
 					var cleanedTweet =  tweets.statuses[i].text.replace(/[^A-Za-z 0-9 \.,\?""!@#\$%\^&\*\(\)-_=\+;:<>\/\\\|\}\{\[\]`~]*/g, '');
 					var extraCleanTweet = cleanedTweet.replace(/[#|@][a-zA-Z]+/g,"");
-					var r1 = sentiment(extraCleanTweet);
+               var r1 = sentiment(extraCleanTweet,{
+                                  'dick': -3,
+                                  'pussy': -5,
+                                  'racist':-5,
+                                  });
 					var tweet = {tweet_id:tweets.statuses[i].id,
 								trump_tweet_id:tweets.statuses[i].in_reply_to_status_id,
 								text:cleanedTweet,
@@ -153,8 +157,8 @@ app.get('/trumpTweet',function(req,res){
 
 app.get('/replies',function(req,res){
 	if(isNaN(req.query.page)==false){
-		limit1 = (parseInt(req.query.page)-1)*10;
-		limit2 = 10;
+		limit1 = (parseInt(req.query.page)-1)*100;
+		limit2 = 100;
 		database.select('replies',"trump_tweet_id="+req.query.tweet_id,limit1,limit2,function(row){
 			res.send(row);
 		});
