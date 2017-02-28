@@ -90,7 +90,7 @@ var checkTrump = new CronJob('00 00 * * * *', function() {
   'America/New_York' /* Time zone of this job. */
 );
 
-var checkForReplies = new CronJob('* */7 * * * *', function() {
+var checkForReplies = new CronJob('00 */7 * * * *', function() {
   /*
    * Runs every 10 minutes
    */
