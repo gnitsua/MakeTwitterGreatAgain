@@ -1,14 +1,15 @@
 [Unit]
 Description=MakeTwitterGreatAgain
+After=network.target
 
 [Service]
-ExecStart=~/Documents/GitHub/MakeTwitterGreatAgain/core.js
+ExecStart=/home/dev/Documents/GitHub/MakeTwitterGreatAgain/core.js
 Restart=always
 User=nobody
 Group=nobody
 Environment=PATH=/usr/bin:/usr/local/bin
 Environment=NODE_ENV=production
-WorkingDirectory=~/Documents/GitHub/MakeTwitterGreatAgain/core.js
+WorkingDirectory=/home/dev/Documents/GitHub/MakeTwitterGreatAgain
 
 [Install]
 WantedBy=multi-user.target
