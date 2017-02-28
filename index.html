@@ -29,7 +29,9 @@
                                        var tweet = msg[0].text;
                                        document.getElementById("tweet").innerHTML = tweet;
                                        trump_tweet_id = msg[0].tweet_id;
-                                       var percent = (msg[0].sed)*100;
+                                       //var percent = Math.round(((msg[0].sed+5)/10)*100);
+                                       var percent = Math.round(((msg[0].sed+3)/6)*100);//temperary reducing range to make it more exciting. could result in an outofbounds
+                                       console.log(percent);
                                        var s = "<div class='progress'>" + "<div class='progress-bar progress-bar-primary' role='progressbar' style='width:" + percent + "%'>" + percent+"%"+ "</div>" + "<div class='progress-bar progress-red' role='progressbar' style='width:" + (100 - percent) + "%'>" + (100 - percent)+"%"+ "</div>" + "</div>"
                                        document.getElementById("graph").innerHTML = s;
                                        
