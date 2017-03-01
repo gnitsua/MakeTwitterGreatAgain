@@ -1,3 +1,4 @@
+#!/usr/bin/env /usr/bin node
 /*
 * CS 275 Group 1
 * Written by Brandon Tran
