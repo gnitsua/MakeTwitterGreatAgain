@@ -48,7 +48,7 @@
                                                   for (i = 0; i < json.length;i++){
                                                       var tweet = msg[i].text
                                                       var val = msg[i].sed
-                                                      if (val >= 0 || val == null) {
+                                                      if (val > 0 || val == null) {
                                                            strp += "<div class='panel panel-primary'>" + "<div class='panel-heading highlight'>" + "<h4 class='panel-title'> <a class='accordion-toggle' data-toggle='collapse' data-parent='#accordion' href='#collapse"+i+"'> <i class='indicator glyphicon glyphicon-minus'></i> Tweet "+(i+1)+"</a> </h4> </div>"+"<div id='collapse"+i+"' class='panel-collapse collapse in'> <div class='panel-body'> "+tweet+" </div>" +"</div></div>"
                                                       
                                                       }
@@ -57,7 +57,7 @@
                                               
                                                       }
                                                       else {
-                                                          alert("Somethings up")
+                                                          //alert("Somethings up")
                                                       }
                                                   }
                                                   document.getElementById("pos-tweets").innerHTML = strp;
@@ -261,22 +261,11 @@
             <p>Project Made By: Austin Gentry, Vraj Patel, Justin Petrecz, and Brandon Tran</p>
         </footer>
 	<!-- Start of StatCounter Code for Default Guide -->
-	<script type="text/javascript">
-		var sc_project=11271334; 
-		var sc_invisible=1; 
-		var sc_security="d7d0919b"; 
-		var scJsHost = (("https:" == document.location.protocol) ?
-		"https://secure." : "http://www.");
-		document.write("<sc"+"ript type='text/javascript' src='" +
-		scJsHost+
-		"statcounter.com/counter/counter.js'></"+"script>");
-	</script>
-	<noscript><div class="statcounter"><a title="web stats"
+	<a title="web stats"
 		href="http://statcounter.com/" target="_blank"><img
 		class="statcounter"
 		src="//c.statcounter.com/11271334/0/d7d0919b/1/" alt="web
-		stats"></a></div>
-	</noscript>
+		stats"></a>
 	<!-- End of StatCounter Code for Default Guide -->        
     </body>
 </html>
