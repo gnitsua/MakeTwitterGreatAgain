@@ -14,7 +14,8 @@ var app = express();
 var path    = require("path");
 var CronJob = require('cron').CronJob;
 var sentiment = require('sentiment');
-require('dotenv').config();
+//require('dotenv').config();
+require('dotenv').config({path: 'env'});
 var events = require('events');
 var eventEmitter = new events.EventEmitter();
 
@@ -22,6 +23,7 @@ app.use('/static', express.static('static'));
 
 var Database = require('./Database');
 var database = new Database();
+
 
 //These keys are tied w/ the CS275_Group1 accont and are needed to access the api
 var twitter = new Twitter({

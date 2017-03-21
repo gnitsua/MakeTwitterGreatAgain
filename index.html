@@ -13,10 +13,16 @@
                             var trump_tweet_id = 0;
                             function aboutMe() {
                                 var string = "The aim of this project was to incorporate machine learning semantic analysis on a Twitter account or any social media platform that relies on a textual medium of conversion. We chose to do Twitter because current events led us to wonder the overall opinion of the web on President Donald Trump's tweets. His tweets have a widespread influence on the world and are read by thousands of people each day so learning about the consensus on his tweets can help mold the opinions of others."
-                                document.getElementById("container1").innerHTML = string;
+                                document.getElementById("overall").innerHTML = string;
                             }
-							
-							$(document).ready(function(){
+                        
+                        function takeMeHome() {
+                            var temp = "<div class='container-fluid bg-1 text-center' id='container1'>" + "<img src='http://49.media.tumblr.com/3a70f0cb0a934cf8684e5822cead95c7/tumblr_o3ko2kKZfX1s2wlrxo1_540.gif' class='img-responsive img-circle margin' style='display:inline' width='350' height='350'>" + "<div id='tweet'><h4>'Anyone who thinks my story is anywhere near over is sadly mistaken.'</h4></div>" + "<h5><i> - @realDonaldTrump via Twitter </i></h5> </div>" + "<div class='container-fluid bg-2 text-center'>" + "<h3 class='margin'>Retweets</h3><br>" + "<div class='row'>" + " <div class='col-sm-12'> <div id='graph'> </div> </div> </div> </br> <div class='row'> <div> <div style='width: 50%;float:left' class='panel-group' id='accordion'> <h4><b> Positive Tweets </b></h4> <div id='pos-tweets' style='width:80%;margin-left:auto;margin-right:auto;'> </div> </div> </div> <div> <div style='width: 49%;float:right' class='panel-group' id='accordion2'> <h4><b> Negative Tweets </b></h4> <div id='neg-tweets' style='width:80%;margin-left:auto;margin-right:auto;'> </div> </div> </div> </div> </div>"
+                            document.getElementById("overall").innerHTML = temp;
+                            initHome();
+                        }
+                        
+                        function initHome() {
 								var URL = "trumpTweet?page=1"
 
 								$.ajax({
@@ -73,7 +79,8 @@
                                        document.getElementById("pos-tweets").innerHTML = "Error fetching trump: " + URL;
                                    }
 							    });
-                            })
+                            }
+                        $(document).ready(initHome());
                         </script>
                         <style>
                             body {
@@ -179,7 +186,7 @@
                             .panel .panel-heading .highlight .negative {
                                 background:#ff4f42;
                             }
-                        .panel .panel-heading:hover {
+                            .panel .panel-heading:hover {
                                 background: grey;
                                 color: white;
                             }
@@ -187,55 +194,46 @@
                         
     </head>
     <body>
-        
+    
         <!-- Navbar -->
         <nav class="navbar navbar-default">
-            <div class="container">
-                <div class="navbar-header">
-                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                    </button>
-                    <a class="navbar-brand" href="#">TRUMP'S GREAT TWEETS</a>
-                </div>
-                <div class="collapse navbar-collapse" id="myNavbar">
-                    <ul class="nav navbar-nav navbar-right">
-                        <li><a href="#" onclick="aboutMe()">ABOUT</a></li>
-                    </ul>
-                </div>
-            </div>
+            <a class="navbar-brand" href="#" onclick="takeMeHome()">TRUMP'S GREAT TWEETS</a>
+            <ul class="nav navbar-nav navbar-right" style="padding-left:15px;padding-right:20px;">
+                <li><a href="#" onclick="aboutMe()">ABOUT</a></li>
+            </ul>
         </nav>
         
-        <!-- First Container -->
-        <div class="container-fluid bg-1 text-center" id="container1">
-            <img src="http://49.media.tumblr.com/3a70f0cb0a934cf8684e5822cead95c7/tumblr_o3ko2kKZfX1s2wlrxo1_540.gif" class="img-responsive img-circle margin" style="display:inline" width="350" height="350">
-                <div id="tweet"><h4>"Anyone who thinks my story is anywhere near over is sadly mistaken."</h4></div>
-                <h5><i> - @realDonaldTrump via Twitter </i></h5>
-        </div>
-
-        <!-- Second Container (Grid) -->
-        <div class="container-fluid bg-2 text-center">
-            <h3 class="margin">Retweets</h3><br>
-            <div class="row">
-                <div class="col-sm-12">
-                    <div id="graph">
-                    </div>
-                </div>
+        <div class="container-fluid bg-1 text-center" id="overall" style="padding-left:0px;padding-right:0px;">
+            <!-- First Container -->
+            <div class="container-fluid bg-1 text-center" id="container1">
+                <img src="http://49.media.tumblr.com/3a70f0cb0a934cf8684e5822cead95c7/tumblr_o3ko2kKZfX1s2wlrxo1_540.gif" class="img-responsive img-circle margin" style="display:inline" width="350" height="350">
+                    <div id="tweet"><h4>"Anyone who thinks my story is anywhere near over is sadly mistaken."</h4></div>
+                    <h5><i> - @realDonaldTrump via Twitter </i></h5>
             </div>
-            </br>
-            <div class="row">
-                <div>
-                    <div style="width: 50%;float:left" class="panel-group" id="accordion">
-                        <h4><b> Positive Tweets </b></h4>
-                        <div id="pos-tweets" style="width:80%;margin-left:auto;margin-right:auto;">
+
+            <!-- Second Container (Grid) -->
+            <div class="container-fluid bg-2 text-center">
+                <h3 class="margin">Retweets</h3><br>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div id="graph">
                         </div>
                     </div>
                 </div>
-                <div>
-                    <div style="width: 49%;float:right" class="panel-group" id="accordion2">
-                        <h4><b> Negative Tweets </b></h4>
-                        <div id="neg-tweets" style="width:80%;margin-left:auto;margin-right:auto;">
+                </br>
+                <div class="row">
+                    <div>
+                        <div style="width: 50%;float:left" class="panel-group" id="accordion">
+                            <h4><b> Positive Tweets </b></h4>
+                            <div id="pos-tweets" style="width:80%;margin-left:auto;margin-right:auto;">
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="width: 49%;float:right" class="panel-group" id="accordion2">
+                            <h4><b> Negative Tweets </b></h4>
+                            <div id="neg-tweets" style="width:80%;margin-left:auto;margin-right:auto;">
+                            </div>
                         </div>
                     </div>
                 </div>
