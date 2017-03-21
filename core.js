@@ -19,6 +19,8 @@ var Sentimental = require('Sentimental');
 require('dotenv').config();
 var events = require('events');
 var eventEmitter = new events.EventEmitter();
+var natural = require('natural');
+TfIdf = natural.TfIdf;
 
 app.use('/static', express.static('static'));
 app.use(bodyParser.json());
@@ -103,7 +105,7 @@ function checkReplies(){
 							if(row.length == 0){//this means we don't have this tweet in the db
 								database.select('trump',"tweet_id="+scopedTweet.trump_tweet_id,'tweet_id',null,null,function(trump_tweets){
 									if(trump_tweets.length != 0){//if ==0 then this tweet is not responding to a tweet we have
-										database.insert('replies',scopedTweet,function(){//insert the reply into the repliestable
+										database.insert('replies',scopedTweet,function(){//insert the reply into the replies table
 											eventEmitter.emit('newReply',scopedTweet);
 										});
 									}
@@ -130,34 +132,55 @@ function checkReplies(){
 function calculateSed(tweet_id){
 	database.select('replies','tweet_id='+tweet_id,null,null,null,function(row){
 		if(row.length>1){//this should never happen
-			Console.log("129: Do we have duplicate replies?");
+			console.log("129: Do we have duplicate replies?");
 		}
 		var tweet = row[0];
 		var extraCleanTweet = tweet.text.replace(/[#|@][a-zA-Z]+/g,"");
-		var r1 = sentiment(extraCleanTweet);
-		if(r1["positive"].length < 1 &&r1["negative"].length < 1){//we didn't get any good words so just don't count this one
-			r1["score"] = null;
-		}
 
-		var r2 = Sentimental.analyze(extraCleanTweet);
+		
+		database.select('user_words',null,null,null,null,function(row){
+			var extraWords = {};
+			for(i=0;i>row.length;i++){
+				extraWords[row[i]["term"]] = row[i]["sed"];
+			}
+			var r1 = sentiment(extraCleanTweet);
+			if(r1["positive"].length < 1 &&r1["negative"].length < 1){//we didn't get any good words so just don't count this one
+				r1["score"] = null;
+			}
 
-		if(r2["positive"]["words"].length < 1  && r2["negative"]["words"].length < 1){
-			r2["score"] = null;
-		}
+			var r2 = sentiment(extraCleanTweet);
+			if(r2["positive"].length < 1 &&r2["negative"].length < 1){//we didn't get any good words so just don't count this one
+				r2["score"] = null;
+			}
 
-		if(r1["score"] == null){
-			sed = r2["score"];
-		}
-		else if(r2["score"] == null){
-			sed = r1["score"];
-		}
-		else{
-			sed = (parseInt(r1["score"])+parseInt(r1["score"]))/2//start with a 50% average
-		}
-		database.update('replies','sed='+r1["score"],'tweet_id='+tweet_id,function(){
-			eventEmitter.emit('newSedDataForTrumpTweet',tweet.trump_tweet_id);
+			database.update('replies','sed='+r1["score"],'tweet_id='+tweet_id,function(){
+				eventEmitter.emit('newSedDataForTrumpTweet',tweet.trump_tweet_id);
+			});
+			database.update('replies','descriptor=\''+JSON.stringify({"semtiment":r1,"smart_sentiment":r2})+'\'','tweet_id='+tweet_id);
+
 		});
-		database.update('replies','descriptor=\''+JSON.stringify({"semtiment":r1,"Sentimental":r2})+'\'','tweet_id='+tweet_id);
+
+		
+
+		// var r2 = Sentimental.analyze(extraCleanTweet);
+
+		// if(r2["positive"]["words"].length < 1  && r2["negative"]["words"].length < 1){
+		// 	r2["score"] = null;
+		// }
+
+		// if(r1["score"] == null){
+		// 	sed = r2["score"];
+		// }
+		// else if(r2["score"] == null){
+		// 	sed = r1["score"];
+		// }
+		// else{
+		// 	sed = (parseInt(r1["score"])+parseInt(r1["score"]))/2//start with a 50% average
+		// }
+		// database.update('replies','sed='+r1["score"],'tweet_id='+tweet_id,function(){
+		// 	eventEmitter.emit('newSedDataForTrumpTweet',tweet.trump_tweet_id);
+		// });
+		// database.update('replies','descriptor=\''+JSON.stringify({"semtiment":r1,"Sentimental":r2})+'\'','tweet_id='+tweet_id);
 	});
 	
 	
@@ -173,6 +196,10 @@ function calculateTrumpSedAverage(trump_tweet_id){
 	database.count('replies','trump_tweet_id='+trump_tweet_id,function(row){
 		database.update('trump','replies='+row[0].count,'tweet_id='+trump_tweet_id);
 	});
+}
+
+function learn(){
+	
 }
 
 //Event listeners
@@ -205,7 +232,7 @@ var topOfTheHour = new CronJob('00 00 * * * *', function() {
   'America/New_York' /* Time zone of this job. */
 );
 
-var fiveMinutes = new CronJob('00 5-55/5 * * * *', function() {
+var fiveMinutes = new CronJob('00 */5 * * * *', function() {//TODO: what in order does this execute at the top of the hour
   /*
    * Runs every 10 minutes '00 5-55/5 * * * *'
    */
@@ -267,6 +294,72 @@ app.post('/train',function(req,res){
 	else{
 		res.send({error:"invalid request"});
 	}
+});
+
+app.get('/tfidf',function(req,res){
+	database.select('replies','sed_training is not null',null,0,100,function(row){
+		var data = {"positive":{},"negative":{}};
+		positive_tfidf = new TfIdf();
+		negative_tfidf = new TfIdf();
+		console.log("TFIDI of "+row.length+" documents")
+		for(i=0;i<row.length;i++){
+			if(row[i].sed > 0 && row[i].sed_training < 0){//only add document that have been marked as classified incorrectly
+				negative_tfidf.addDocument(row[i].text);
+			}
+			if(row[i].sed < 0 && row[i].sed_training > 0){
+				positive_tfidf.addDocument(row[i].text);
+			}
+		}
+		console.log("positive docs: " +positive_tfidf.documents.length);
+		for(i=0;i<positive_tfidf.documents.length;i++){//get the list of terms for all positive documents
+			positive_tfidf.listTerms(i).forEach(function(term) {
+				if(term["term"] in data["positive"]){//we already have this word so average
+					data["positive"][term["term"]] = (data["positive"][term["term"]]+term["tfidf"])/2;
+				}
+				else{//this is the first time we've seen this word
+					data["positive"][term["term"]] = term["tfidf"];
+				}
+			});
+		}
+		console.log("negative docs: " +negative_tfidf.documents.length);
+		for(i=0;i<negative_tfidf.documents.length;i++){//get the list of terms for all negative documents
+			negative_tfidf.listTerms(i).forEach(function(term) {
+				if(term["term"] in data["negative"]){//we already have this word so average
+					data["negative"][term["term"]] = (data["negative"][term["term"]]+term["tfidf"])/2;
+				}
+				else{//this is the first time we've seen this word
+					data["negative"][term["term"]] = term["tfidf"];
+				}
+			});
+		}
+		for(var key in data["positive"]){//check if any word that is in positive is in negative
+			console.log(key in data["negative"]);
+			if(key in data["negative"]){//if a word is in both lists we aren't interested in it
+				console.log("in both lists: " + key);
+				delete data["negative"][String(key)];//had to the add the String() because some of our terms could be numbers and javscript can't tell the difference between a number key and an index
+				delete data["positive"][String(key)];
+
+			}
+			else{//otherwise let's save it in the database
+				console.log("add to database")
+				database.replace('user_words',{term:key,sed:5});
+			}
+		}
+		for(var key in data["negative"]){//check if any word that is in negative is in postive
+			if(key in data["positive"]){
+				console.log("in both lists: " + key);
+				delete data["positive"][String(key)];//had to the add the String() because some of our terms could be numbers and javscript can't tell the difference between a number key and an index
+				delete data["negative"][String(key)];
+
+			}
+			else{//otherwise let's save it in the database
+				console.log("add to database")
+				database.replace('user_words',{term:key,sed:-5});
+			}
+		}
+
+		res.send(data);
+	});
 });
 
 app.listen(process.env.PORT,function(){
