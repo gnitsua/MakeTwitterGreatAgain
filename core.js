@@ -16,6 +16,8 @@ var CronJob = require('cron').CronJob;
 var sentiment = require('sentiment');
 require('dotenv').config()
 
+app.use('/static', express.static('static'));
+
 var Database = require('./Database');
 var database = new Database();
 
@@ -187,5 +189,5 @@ app.get('/replies',function(req,res){
 });
 
 app.listen(process.env.PORT,function(){
-	console.log("Server Running…");
+	console.log("Server Running at "+process.env.PORT+"…");
 });
