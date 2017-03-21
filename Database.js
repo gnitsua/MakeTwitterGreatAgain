@@ -78,13 +78,15 @@ function Database(){
           		return;
         	} 
         	else{
+        		//console.log('UPDATE ' + table + ' SET ' + set + ' WHERE '+ where);
+
         		con.query(
-  					'UPDATE '+table+' SET '+set+' Where '+where,
+  					'UPDATE '+table+' SET '+set+' WHERE '+where,
   					function (err, result) {
   						con.release();
     					if (err) throw err;
 						console.log('Changed ' + result.changedRows + ' rows');
-						if(callback!== undefined){
+						if(callback !== undefined){
 							callback(result.changedRows);
 						}
  					});
@@ -122,6 +124,30 @@ function Database(){
         	} 
         	else{
 				query = 'SELECT COUNT(*) AS count FROM '+table;
+				if(where !== null){
+					query += ' WHERE ' + where;
+				}
+				con.query(
+  					query,
+  					function (err, result) {
+  						con.release();
+    					if (err) throw err;
+    					if(callback!== undefined){
+    						callback(result);
+    					}
+ 					});
+        	}
+        });
+		
+	};
+	Database.prototype.average = function(table,where,callback) {
+		pool.getConnection(function(err,con){
+        	if (err) {
+          		console.log("116: Error in connection database");
+          		return;
+        	} 
+        	else{
+				query = 'SELECT AVG(sed) AS average FROM '+table;
 				if(where !== null){
 					query += ' WHERE ' + where;
 				}

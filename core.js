@@ -10,16 +10,19 @@
 var Twitter = require('twitter');
 var http = require('http');
 var express = require('express');
+var bodyParser = require("body-parser");
 var app = express();
 var path    = require("path");
 var CronJob = require('cron').CronJob;
 var sentiment = require('sentiment');
-//require('dotenv').config();
-require('dotenv').config({path: 'env'});
+var Sentimental = require('Sentimental');
+require('dotenv').config();
 var events = require('events');
 var eventEmitter = new events.EventEmitter();
 
 app.use('/static', express.static('static'));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 var Database = require('./Database');
 var database = new Database();
@@ -67,7 +70,7 @@ function checkTrump(){
 					database.select('trump','tweet_id='+scopedTweet["tweet_id"],null,null,null,function(row){
 					if(row.length == 0){//this means we don't have this tweet in the db
 						database.insert('trump',scopedTweet);//TODO: potential issue if the tweet contains characters that aren't supported by mysql
-						eventEmitter.emit('gotTrumpTweet');
+						eventEmitter.emit('gotTrumpTweet',scopedTweet);
 						//console.log(scopedTweet)
 					}
 					else{
@@ -92,31 +95,17 @@ function checkReplies(){
 			for(var i = 0; i < length; i++){
 				if(tweets.statuses[i].in_reply_to_status_id!==null){
 					var cleanedTweet =  tweets.statuses[i].text.replace(/[^A-Za-z 0-9 \.,\?""!@#\$%\^&\*\(\)-_=\+;:<>\/\\\|\}\{\[\]`~]*/g, '');
-					var extraCleanTweet = cleanedTweet.replace(/[#|@][a-zA-Z]+/g,"");
-					var r1 = sentiment(extraCleanTweet);
 					var tweet = {tweet_id:tweets.statuses[i].id,
 								trump_tweet_id:tweets.statuses[i].in_reply_to_status_id,
-								text:cleanedTweet,
-								sed:r1["score"]};
+								text:cleanedTweet};
 					(function(scopedTweet){
 						database.select('replies','tweet_id='+scopedTweet["tweet_id"],'tweet_id',null,null,function(row){
 							if(row.length == 0){//this means we don't have this tweet in the db
 								database.select('trump',"tweet_id="+scopedTweet.trump_tweet_id,'tweet_id',null,null,function(trump_tweets){
 									if(trump_tweets.length != 0){//if ==0 then this tweet is not responding to a tweet we have
-										database.insert('replies',scopedTweet,function(){
-											database.count('replies','trump_tweet_id='+scopedTweet.trump_tweet_id,function(row){
-												if(trump_tweets[0].sed == null){
-														average = scopedTweet.sed;//must be the first reply we've gotten
-												}
-												else{
-														average = (parseInt(trump_tweets[0].sed)*row[0].count + parseInt(scopedTweet.sed))*1.0/(row[0].count+1); // find the new average
-												}
-												database.update('trump','sed='+average,'tweet_id='+trump_tweets[0].tweet_id,function(){
-													database.update('trump','replies='+row[0].count,'tweet_id='+trump_tweets[0].tweet_id);
-												});
-											});
+										database.insert('replies',scopedTweet,function(){//insert the reply into the repliestable
+											eventEmitter.emit('newReply',scopedTweet);
 										});
-										
 									}
 								});
 								
@@ -138,6 +127,53 @@ function checkReplies(){
 	});
 }
 
+function calculateSed(tweet_id){
+	database.select('replies','tweet_id='+tweet_id,null,null,null,function(row){
+		if(row.length>1){//this should never happen
+			Console.log("129: Do we have duplicate replies?");
+		}
+		var tweet = row[0];
+		var extraCleanTweet = tweet.text.replace(/[#|@][a-zA-Z]+/g,"");
+		var r1 = sentiment(extraCleanTweet);
+		if(r1["positive"].length < 1 &&r1["negative"].length < 1){//we didn't get any good words so just don't count this one
+			r1["score"] = null;
+		}
+
+		var r2 = Sentimental.analyze(extraCleanTweet);
+
+		if(r2["positive"]["words"].length < 1  && r2["negative"]["words"].length < 1){
+			r2["score"] = null;
+		}
+
+		if(r1["score"] == null){
+			sed = r2["score"];
+		}
+		else if(r2["score"] == null){
+			sed = r1["score"];
+		}
+		else{
+			sed = (parseInt(r1["score"])+parseInt(r1["score"]))/2//start with a 50% average
+		}
+		database.update('replies','sed='+r1["score"],'tweet_id='+tweet_id,function(){
+			eventEmitter.emit('newSedDataForTrumpTweet',tweet.trump_tweet_id);
+		});
+		database.update('replies','descriptor=\''+JSON.stringify({"semtiment":r1,"Sentimental":r2})+'\'','tweet_id='+tweet_id);
+	});
+	
+	
+}
+
+function calculateTrumpSedAverage(trump_tweet_id){
+	//update the trump average by counting the number of trump tweets and then adding to the average
+	console.log("trump sed average")
+	database.average('replies','trump_tweet_id='+trump_tweet_id,function(row){
+		console.log("trump_tweet_id: " + trump_tweet_id + " sed: "+row[0].average);
+		database.update('trump','sed='+row[0].average,'tweet_id='+trump_tweet_id);
+	});
+	database.count('replies','trump_tweet_id='+trump_tweet_id,function(row){
+		database.update('trump','replies='+row[0].count,'tweet_id='+trump_tweet_id);
+	});
+}
 
 //Event listeners
 eventEmitter.on('timeToGetTrumpTweet',function(){
@@ -148,6 +184,12 @@ eventEmitter.on('cleanUpTime',function(){
 })
 eventEmitter.on('gotTrumpTweet',function(){
 	checkReplies();
+});
+eventEmitter.on('newReply',function(tweet){
+	calculateSed(tweet["tweet_id"]);
+});
+eventEmitter.on('newSedDataForTrumpTweet',function(trump_tweet_id){
+	calculateTrumpSedAverage(trump_tweet_id);
 });
 
 var topOfTheHour = new CronJob('00 00 * * * *', function() {
@@ -165,7 +207,7 @@ var topOfTheHour = new CronJob('00 00 * * * *', function() {
 
 var fiveMinutes = new CronJob('00 5-55/5 * * * *', function() {
   /*
-   * Runs every 10 minutes
+   * Runs every 10 minutes '00 5-55/5 * * * *'
    */
    console.log('five minutes')
    checkReplies();
@@ -209,6 +251,18 @@ app.get('/replies',function(req,res){
 		database.select('replies',"trump_tweet_id="+parseInt(req.query.tweet_id),'tweet_id',limit1,limit2,function(row){
 			res.send(row);
 		});
+	}
+	else{
+		res.send({error:"invalid request"});
+	}
+});
+
+app.post('/train',function(req,res){
+	console.log(req.body)
+	if(isNaN(req.body.tweet_id)==false&&isNaN(req.body.sed_training)==false){
+		database.update('replies','sed_training='+parseInt(req.body.sed_training),'tweet_id='+parseInt(req.body.tweet_id),function(){
+			res.sendStatus(200);
+		})
 	}
 	else{
 		res.send({error:"invalid request"});
