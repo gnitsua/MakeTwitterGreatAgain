@@ -11,76 +11,92 @@
                         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
                         <script>
                             var trump_tweet_id = 0;
+                            var page = 0;
                             function aboutMe() {
                                 var string = "The aim of this project was to incorporate machine learning semantic analysis on a Twitter account or any social media platform that relies on a textual medium of conversion. We chose to do Twitter because current events led us to wonder the overall opinion of the web on President Donald Trump's tweets. His tweets have a widespread influence on the world and are read by thousands of people each day so learning about the consensus on his tweets can help mold the opinions of others."
                                 document.getElementById("overall").innerHTML = string;
                             }
                         
-                        function takeMeHome() {
-                            var temp = "<div class='container-fluid bg-1 text-center' id='container1'>" + "<img src='http://49.media.tumblr.com/3a70f0cb0a934cf8684e5822cead95c7/tumblr_o3ko2kKZfX1s2wlrxo1_540.gif' class='img-responsive img-circle margin' style='display:inline' width='350' height='350'>" + "<div id='tweet'><h4>'Anyone who thinks my story is anywhere near over is sadly mistaken.'</h4></div>" + "<h5><i> - @realDonaldTrump via Twitter </i></h5> </div>" + "<div class='container-fluid bg-2 text-center'>" + "<h3 class='margin'>Retweets</h3><br>" + "<div class='row'>" + " <div class='col-sm-12'> <div id='graph'> </div> </div> </div> </br> <div class='row'> <div> <div style='width: 50%;float:left' class='panel-group' id='accordion'> <h4><b> Positive Tweets </b></h4> <div id='pos-tweets' style='width:80%;margin-left:auto;margin-right:auto;'> </div> </div> </div> <div> <div style='width: 49%;float:right' class='panel-group' id='accordion2'> <h4><b> Negative Tweets </b></h4> <div id='neg-tweets' style='width:80%;margin-left:auto;margin-right:auto;'> </div> </div> </div> </div> </div>"
-                            document.getElementById("overall").innerHTML = temp;
-                            initHome();
-                        }
-                        
-                        function initHome() {
-								var URL = "trumpTweet?page=1"
-
-								$.ajax({
-									type: "GET",
-									url: URL,
-									contentType: "application/json; charset=utf-8",
-									data: "{}",
-									dataType: "json",
-					
-									success: function(msg) {
-                                       var tweet = msg[0].text;
-                                       document.getElementById("tweet").innerHTML = tweet;
-                                       trump_tweet_id = msg[0].tweet_id;
-                                       //var percent = Math.round(((msg[0].sed+5)/10)*100);
-                                       var percent = Math.round(((msg[0].sed+3)/6)*100);//temperary reducing range to make it more exciting. could result in an outofbounds
-                                       console.log(percent);
-                                       var s = "<div class='progress'>" + "<div class='progress-bar progress-bar-primary' role='progressbar' style='width:" + percent + "%'>" + percent+"%"+ "</div>" + "<div class='progress-bar progress-red' role='progressbar' style='width:" + (100 - percent) + "%'>" + (100 - percent)+"%"+ "</div>" + "</div>"
-                                       document.getElementById("graph").innerHTML = s;
-                                       
-                                       var URL2 = "replies?tweet_id="+trump_tweet_id+"&page=1"
-                                       $.ajax({
-                                              type: "GET",
-                                              url: URL2,
-                                              contentType: "application/json; charset=utf-8",
-                                              dataType: "json",
-                                              success: function(msg) {
-                                                  var json = msg;
-                                                  strp = "";
-                                                  strn = "";
-                                                  for (i = 0; i < json.length;i++){
-                                                      var tweet = msg[i].text
-                                                      var val = msg[i].sed
-                                                      if (val > 0 || val == null) {
-                                                           strp += "<div class='panel panel-primary'>" + "<div class='panel-heading highlight'>" + "<h4 class='panel-title'> <a class='accordion-toggle' data-toggle='collapse' data-parent='#accordion' href='#collapse"+i+"'> <i class='indicator glyphicon glyphicon-minus'></i> Tweet "+(i+1)+"</a> </h4> </div>"+"<div id='collapse"+i+"' class='panel-collapse collapse in'> <div class='panel-body'> "+tweet+" </div>" +"</div></div>"
-                                                      
-                                                      }
-                                                      else if (val < 0) {
-                                                          strn += "<div class='panel panel-primary'>" + "<div class='panel-heading highlight' style='background:#ff4f42;'>" + "<h4 class='panel-title'> <a class='accordion-toggle' data-toggle='collapse' data-parent='#accordion' href='#collapse"+i+"'> <i class='indicator glyphicon glyphicon-minus'></i> Tweet "+(i+1)+"</a> </h4> </div>"+"<div id='collapse"+i+"' class='panel-collapse collapse in'> <div class='panel-body'> "+tweet+" </div>" +"</div></div>"
-                                              
-                                                      }
-                                                      else {
-                                                          //alert("Somethings up")
-                                                      }
-                                                  }
-                                                  document.getElementById("pos-tweets").innerHTML = strp;
-                                                  document.getElementById("neg-tweets").innerHTML = strn;
-                                              },
-                                              error: function (xhr, ajaxOptions, thrownError) {
-                                                  document.getElementById("pos-tweets").innerHTML = "Error fetching replies: " + URL;
-                                              }
-                                      });
-                                    },
-                                   error: function (xhr, ajaxOptions, thrownError) {
-                                       document.getElementById("pos-tweets").innerHTML = "Error fetching trump: " + URL;
-                                   }
-							    });
+                            function takeMeHome() {
+                                var temp = "<div class='container-fluid bg-1 text-center' id='container1'>" + "<img src='http://49.media.tumblr.com/3a70f0cb0a934cf8684e5822cead95c7/tumblr_o3ko2kKZfX1s2wlrxo1_540.gif' class='img-responsive img-circle margin' style='display:inline' width='350' height='350'>" + "<div id='tweet'><h4>'Anyone who thinks my story is anywhere near over is sadly mistaken.'</h4></div>" + "<h5><i> - @realDonaldTrump via Twitter </i></h5> </div>" + "<div class='container-fluid bg-2 text-center'>" + "<h3 class='margin'>Retweets</h3><br>" + "<div class='row'>" + " <div class='col-sm-12'> <div id='graph'> </div> </div> </div> </br> <div class='row'> <div> <div style='width: 50%;float:left' class='panel-group' id='accordion'> <h4><b> Positive Tweets </b></h4> <div id='pos-tweets' style='width:80%;margin-left:auto;margin-right:auto;'> </div> </div> </div> <div> <div style='width: 49%;float:right' class='panel-group' id='accordion2'> <h4><b> Negative Tweets </b></h4> <div id='neg-tweets' style='width:80%;margin-left:auto;margin-right:auto;'> </div> </div> </div> </div> </div>"
+                                document.getElementById("overall").innerHTML = temp;
+                                initHome();
                             }
-                        $(document).ready(initHome());
+                        
+                            function increaseTweet() {
+                                page = page + 1;
+                                initHome(page);
+                            }
+                            
+                            function decreaseTweet() {
+                                if (page == 0) {
+                                    page = 0;
+                                }
+                                else {
+                                    page = page - 1;
+                                }
+                                initHome(page);
+                            }
+                        
+                            function initHome(t) {
+                                    var URL = "trumpTweet?page=1"
+
+                                    $.ajax({
+                                        type: "GET",
+                                        url: URL,
+                                        contentType: "application/json; charset=utf-8",
+                                        data: "{}",
+                                        dataType: "json",
+                        
+                                        success: function(msg) {
+                                           var tweet = msg[t].text;
+                                           document.getElementById("tweet").innerHTML = tweet;
+                                           trump_tweet_id = msg[t].tweet_id;
+                                           //var percent = Math.round(((msg[0].sed+5)/10)*100);
+                                           var percent = Math.round(((msg[t].sed+3)/6)*100);//temperary reducing range to make it more exciting. could result in an outofbounds
+                                           console.log(percent);
+                                           var s = "<div class='progress'>" + "<div class='progress-bar progress-bar-primary' role='progressbar' style='width:" + percent + "%'>" + percent+"%"+ "</div>" + "<div class='progress-bar progress-red' role='progressbar' style='width:" + (100 - percent) + "%'>" + (100 - percent)+"%"+ "</div>" + "</div>"
+                                           document.getElementById("graph").innerHTML = s;
+                                           
+                                           var URL2 = "replies?tweet_id="+trump_tweet_id+"&page=1"
+                                           $.ajax({
+                                                  type: "GET",
+                                                  url: URL2,
+                                                  contentType: "application/json; charset=utf-8",
+                                                  dataType: "json",
+                                                  success: function(msg) {
+                                                      var json = msg;
+                                                      strp = "";
+                                                      strn = "";
+                                                      for (i = 0; i < json.length;i++){
+                                                          var tweet = msg[i].text
+                                                          var val = msg[i].sed
+                                                          if (val > 0 || val == null) {
+                                                               strp += "<div class='panel panel-primary'>" + "<div class='panel-heading highlight'>" + "<h4 class='panel-title'> <a class='accordion-toggle' data-toggle='collapse' data-parent='#accordion' href='#collapse"+i+"'> <i class='indicator glyphicon glyphicon-minus'></i> Tweet "+(i+1)+"</a> </h4> </div>"+"<div id='collapse"+i+"' class='panel-collapse collapse in'> <div class='panel-body'> "+tweet+" </div>" +"</div></div>"
+                                                          
+                                                          }
+                                                          else if (val < 0) {
+                                                              strn += "<div class='panel panel-primary'>" + "<div class='panel-heading highlight' style='background:#ff4f42;'>" + "<h4 class='panel-title'> <a class='accordion-toggle' data-toggle='collapse' data-parent='#accordion' href='#collapse"+i+"'> <i class='indicator glyphicon glyphicon-minus'></i> Tweet "+(i+1)+"</a> </h4> </div>"+"<div id='collapse"+i+"' class='panel-collapse collapse in'> <div class='panel-body'> "+tweet+" </div>" +"</div></div>"
+                                                  
+                                                          }
+                                                          else {
+                                                              //alert("Somethings up")
+                                                          }
+                                                      }
+                                                      document.getElementById("pos-tweets").innerHTML = strp;
+                                                      document.getElementById("neg-tweets").innerHTML = strn;
+                                                  },
+                                                  error: function (xhr, ajaxOptions, thrownError) {
+                                                      document.getElementById("pos-tweets").innerHTML = "Error fetching replies: " + URL;
+                                                  }
+                                          });
+                                        },
+                                       error: function (xhr, ajaxOptions, thrownError) {
+                                           document.getElementById("pos-tweets").innerHTML = "Error fetching trump: " + URL;
+                                       }
+                                    });
+                                }
+                                $(document).ready(initHome(0));
                         </script>
                         <style>
                             body {
@@ -207,8 +223,20 @@
             <!-- First Container -->
             <div class="container-fluid bg-1 text-center" id="container1">
                 <img src="http://49.media.tumblr.com/3a70f0cb0a934cf8684e5822cead95c7/tumblr_o3ko2kKZfX1s2wlrxo1_540.gif" class="img-responsive img-circle margin" style="display:inline" width="350" height="350">
-                    <div id="tweet"><h4>"Anyone who thinks my story is anywhere near over is sadly mistaken."</h4></div>
-                    <h5><i> - @realDonaldTrump via Twitter </i></h5>
+                <div>
+                    <table>
+                        <tr>
+                            <td class="glyphicon glyphicon-chevron-left" aria-hidden="true" onclick="decreaseTweet()"></td>
+                            <td align="center" width="80%">
+                                <div id="tweet">
+                                    <h4>"Anyone who thinks my story is anywhere near over is sadly mistaken."</h4>
+                                </div>
+                                <h5><i> - @realDonaldTrump via Twitter </i></h5>
+                            </td>
+                            <td class="glyphicon glyphicon-chevron-right" aria-hidden="true" onclick="increaseTweet()"></td>
+                        </tr>
+                    </table>
+                </div>
             </div>
 
             <!-- Second Container (Grid) -->
@@ -247,7 +275,6 @@
                 .prev('.panel-heading')
                 .find('i.indicator')
                 .toggleClass('glyphicon-minus glyphicon-plus');
-                //$('#accordion .panel-heading').css('background-color', 'green');
                 theAccordion.find('.panel-heading').removeClass('highlight');
                 $(e.target).prev('.panel-heading').addClass('highlight');
             }
