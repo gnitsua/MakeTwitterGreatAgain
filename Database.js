@@ -71,6 +71,28 @@ function Database(){
 		
 
 	};
+	Database.prototype.replace = function(table,data,callback) {
+		pool.getConnection(function(err,con){
+        	if (err) {
+          		console.log("54: Error in connection database");
+          		return;
+        	} 
+        	else{
+				console.log("replacing");
+				//console.log(data);
+				con.query('REPLACE INTO '+table+' SET ?', data, function(err,res){
+					con.release();
+  					if(err) throw err;
+					console.log('Last replace ID:', res.insertId);
+					if(callback !== undefined){
+						callback(res.insertId);
+					}
+				});
+        	}
+        });
+		
+
+	};
 	Database.prototype.update = function(table,set,where,callback) {
 		pool.getConnection(function(err,con){
         	if (err) {
