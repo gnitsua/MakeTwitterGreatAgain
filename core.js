@@ -14,7 +14,9 @@ var app = express();
 var path    = require("path");
 var CronJob = require('cron').CronJob;
 var sentiment = require('sentiment');
-require('dotenv').config()
+require('dotenv').config();
+var events = require('events');
+var eventEmitter = new events.EventEmitter();
 
 app.use('/static', express.static('static'));
 
@@ -29,40 +31,30 @@ var twitter = new Twitter({
 	access_token_secret: process.env.ACCESS_TOKEN_SECRET
 });
 
-var clean = new CronJob('00 30 * * * *', function() {
-  /*
-   * Runs every 10 minutes
-   */
+
+
+//Functions the server does
+function cleanDatabase(){
 	console.log('Cleaning');
 	database.select('trump',null,10,100,function(row){
-			var length = row.length;
-			for(var i = 0; i < length; i++){
-				var tweet = {tweet_id:row[i].tweet_id,text:row[i].text};
-				(function(scopedTweet){
-					console.log('should delete '+ tweet.tweet_id)
-					database.delete('replies','trump_tweet_id='+tweet.tweet_id,function(){
-						console.log("deleted all replies for tweet: "+tweet.tweet_id);
-						database.delete('trump','tweet_id='+tweet.tweet_id,function(){
-							console.log('deleted trump tweet: '+tweet.tweet_id);
-						});
+		var length = row.length;
+		for(var i = 0; i < length; i++){
+			var tweet = {tweet_id:row[i].tweet_id,text:row[i].text};
+			(function(scopedTweet){
+				console.log('should delete '+ tweet.tweet_id)
+				database.delete('replies','trump_tweet_id='+tweet.tweet_id,function(){
+					console.log("deleted all replies for tweet: "+tweet.tweet_id);
+					database.delete('trump','tweet_id='+tweet.tweet_id,function(){
+						console.log('deleted trump tweet: '+tweet.tweet_id);
 					});
-				})(tweet);
-			}
-		});
-  }, function () {
-    /* This function is executed when the job stops */
-  },
-  true, /* Start the job right now */
-  'America/New_York' /* Time zone of this job. */
-);
+				});
+			})(tweet);
+		}
+	});
+}
 
-var checkTrump = new CronJob('00 00 * * * *', function() {
-  /*
-   * Runs every hour at 00:00
-   */
+function checkTrump(){
 	var params = {screen_name: 'realDonaldTrump'};
-
-
 	twitter.get('statuses/user_timeline',params,function(error,tweets,response){
 		if(!error){
 			console.log('Retrieving trump tweets');
@@ -72,7 +64,8 @@ var checkTrump = new CronJob('00 00 * * * *', function() {
 				(function(scopedTweet){
 					database.select('trump','tweet_id='+scopedTweet["tweet_id"],null,null,null,function(row){
 					if(row.length == 0){//this means we don't have this tweet in the db
-						database.insert('trump',scopedTweet);
+						database.insert('trump',scopedTweet);//TODO: potential issue if the tweet contains characters that aren't supported by mysql
+						eventEmitter.emit('gotTrumpTweet');
 						//console.log(scopedTweet)
 					}
 					else{
@@ -86,18 +79,10 @@ var checkTrump = new CronJob('00 00 * * * *', function() {
 			console.log("twitter error");
 		}
 	});
-  }, function () {
-    /* This function is executed when the job stops */
-  },
-  true, /* Start the job right now */
-  'America/New_York' /* Time zone of this job. */
-);
+}
 
-var checkForReplies = new CronJob('00 */7 * * * *', function() {
-  /*
-   * Runs every 10 minutes
-   */
-   var params = {screen_name: 'realDonaldTrump'};
+function checkReplies(){
+	var params = {screen_name: 'realDonaldTrump'};
    twitter.get('search/tweets.json?q=to:realDonaldTrump&count=100',params,function(error,tweets,response){
 		if(!error){
 			var length = tweets.statuses.length;
@@ -149,6 +134,39 @@ var checkForReplies = new CronJob('00 */7 * * * *', function() {
 			console.log(error)
 		}
 	});
+}
+
+
+//Event listeners
+eventEmitter.on('timeToGetTrumpTweet',function(){
+	checkTrump();
+});
+eventEmitter.on('cleanUpTime',function(){
+	cleanDatabase();
+})
+eventEmitter.on('gotTrumpTweet',function(){
+	checkReplies();
+});
+
+var topOfTheHour = new CronJob('00 00 * * * *', function() {
+  /*
+   * Runs every hour at 00:00
+   */
+	eventEmitter.emit('timeToGetTrumpTweet');
+  }, function () {
+    /* This function is executed when the job stops */
+    eventEmitter.emit('cleanUpTime');
+  },
+  true, /* Start the job right now */
+  'America/New_York' /* Time zone of this job. */
+);
+
+var fiveMinutes = new CronJob('00 5-55/5 * * * *', function() {
+  /*
+   * Runs every 10 minutes
+   */
+   console.log('five minutes')
+   checkReplies();
   }, function () {
     /* This function is executed when the job stops */
   },
