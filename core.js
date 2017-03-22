@@ -29,6 +29,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 var Database = require('./Database');
 var database = new Database();
 
+
 //These keys are tied w/ the CS275_Group1 accont and are needed to access the api
 var twitter = new Twitter({
 	consumer_key: process.env.CONSUMER_KEY,
