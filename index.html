@@ -57,6 +57,7 @@
                                            console.log(percent);
                                            var s = "<div class='progress'>" + "<div class='progress-bar progress-bar-primary' role='progressbar' style='width:" + percent + "%'>" + percent+"%"+ "</div>" + "<div class='progress-bar progress-red' role='progressbar' style='width:" + (100 - percent) + "%'>" + (100 - percent)+"%"+ "</div>" + "</div>"
                                            document.getElementById("graph").innerHTML = s;
+                                           document.getElementById("retweetNum").innerHTML = "("+msg[t].replies+")";
                                            
                                            var URL2 = "replies?tweet_id="+trump_tweet_id+"&page=1"
                                            $.ajax({
@@ -69,14 +70,15 @@
                                                       strp = "";
                                                       strn = "";
                                                       for (i = 0; i < json.length;i++){
+                                                          var tweet_id = msg[i].tweet_id;  
                                                           var tweet = msg[i].text
                                                           var val = msg[i].sed
                                                           if (val > 0 || val == null) {
-                                                               strp += "<div class='panel panel-primary'>" + "<div class='panel-heading highlight'>" + "<h4 class='panel-title'> <a class='accordion-toggle' data-toggle='collapse' data-parent='#accordion' href='#collapse"+i+"'> <i class='indicator glyphicon glyphicon-minus'></i> Tweet "+(i+1)+"</a> </h4> </div>"+"<div id='collapse"+i+"' class='panel-collapse collapse in'> <div class='panel-body'> "+tweet+" </div>" +"</div></div>"
+                                                               strp += "<div class='panel panel-primary'>" + "<div class='panel-heading highlight'>" + "<h4 class='panel-title'> <a class='accordion-toggle' data-toggle='collapse' data-parent='#accordion' href='#collapse"+i+"'> <i class='indicator glyphicon glyphicon-minus'></i> Tweet "+(i+1)+"</a> </h4> </div>"+"<div id='collapse"+i+"' class='panel-collapse collapse in'> <div class='panel-body'> "+tweet+" </div>" +"<button type='button' class='btn btn-danger' onclick='train("+tweet_id+",-1);'>Wrong</button></div></div>"
                                                           
                                                           }
                                                           else if (val < 0) {
-                                                              strn += "<div class='panel panel-primary'>" + "<div class='panel-heading highlight' style='background:#ff4f42;'>" + "<h4 class='panel-title'> <a class='accordion-toggle' data-toggle='collapse' data-parent='#accordion' href='#collapse"+i+"'> <i class='indicator glyphicon glyphicon-minus'></i> Tweet "+(i+1)+"</a> </h4> </div>"+"<div id='collapse"+i+"' class='panel-collapse collapse in'> <div class='panel-body'> "+tweet+" </div>" +"</div></div>"
+                                                              strn += "<div class='panel panel-primary'>" + "<div class='panel-heading highlight' style='background:#ff4f42;'>" + "<h4 class='panel-title'> <a class='accordion-toggle' data-toggle='collapse' data-parent='#accordion' href='#collapse"+i+"'> <i class='indicator glyphicon glyphicon-minus'></i> Tweet "+(i+1)+"</a> </h4> </div>"+"<div id='collapse"+i+"' class='panel-collapse collapse in'> <div class='panel-body'> "+tweet+" </div>" +"<button type='button' class='btn btn-danger' onclick='train("+tweet_id+",1);'>Wrong</button></div></div>";
                                                   
                                                           }
                                                           else {
@@ -242,8 +244,9 @@
 
             <!-- Second Container (Grid) -->
             <div class="container-fluid bg-2 text-center">
-                <h3 class="margin">Retweets</h3><br>
-                <div class="row">
+                <h3>Retweets</h3>
+                <h5 id="retweetNum">(100)</h5>
+                <div class="row" style="margin-top: 30px;">
                     <div class="col-sm-12">
                         <div id="graph">
                         </div>
