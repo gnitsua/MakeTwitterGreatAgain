@@ -68,6 +68,8 @@ function checkTrump(){
 			var length = tweets.length;
 			for(var i = 0; i < length; i++){
 				var tweet = {tweet_id:tweets[i].id,text:tweets[i].text};
+				var cleanedTweet =  tweets[i].text.replace(/[^A-Za-z 0-9 \.,\?""!@#\$%\^&\*\(\)-_=\+;:<>\/\\\|\}\{\[\]`~]*/g, '');
+				tweet.text = cleanedTweet;
 				(function(scopedTweet){
 					database.select('trump','tweet_id='+scopedTweet["tweet_id"],null,null,null,function(row){
 					if(row.length == 0){//this means we don't have this tweet in the db
@@ -138,7 +140,7 @@ function calculateSed(tweet_id){
 		var extraCleanTweet = tweet.text.replace(/[#|@][a-zA-Z]+/g,"");
 
 		
-		database.select('user_words',null,null,null,null,function(row){
+		database.select('user_words','weight>1',null,null,null,function(row){
 			var extraWords = {};
 			for(i=0;i>row.length;i++){
 				extraWords[row[i]["term"]] = row[i]["sed"];
@@ -342,7 +344,7 @@ app.get('/tfidf',function(req,res){
 			}
 			else{//otherwise let's save it in the database
 				console.log("add to database")
-				database.replace('user_words',{term:key,sed:5});
+				database.replace('user_words',{term:key,sed:5,weight:data["negative"][key]});
 			}
 		}
 		for(var key in data["negative"]){//check if any word that is in negative is in postive
@@ -354,7 +356,7 @@ app.get('/tfidf',function(req,res){
 			}
 			else{//otherwise let's save it in the database
 				console.log("add to database")
-				database.replace('user_words',{term:key,sed:-5});
+				database.replace('user_words',{term:key,sed:-5,weight:data["negative"][key]});
 			}
 		}
 
