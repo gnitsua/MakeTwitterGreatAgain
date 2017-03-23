@@ -22,6 +22,7 @@ var eventEmitter = new events.EventEmitter();
 var natural = require('natural');
 TfIdf = natural.TfIdf;
 
+debug = false;
 //check for the debug flag
 if(process.argv.length > 2){
 	arg = process.argv[2];
@@ -29,9 +30,7 @@ if(process.argv.length > 2){
 	if(arg.split('--')[1]=='debug'){
 		debug = true;
 	}
-	else{
-		debug = false;
-	}
+
 }
 
 app.use('/static', express.static('static'));
