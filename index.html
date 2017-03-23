@@ -28,7 +28,12 @@
                             }
                         
                             function increaseTweet() {
-                                page = page + 1;
+                                if (page == 9) {
+                                    page = 9;
+                                }
+                                else {
+                                    page = page + 1;
+                                }
                                 initHome(page);
                             }
                             
@@ -59,8 +64,8 @@
                                            var tweet = msg[t].text;
                                            document.getElementById("tweet").innerHTML = tweet;
                                            trump_tweet_id = msg[t].tweet_id;
-                                           //var percent = Math.round(((msg[0].sed+5)/10)*100);
-                                           var percent = Math.round(((msg[t].sed+3)/6)*100);//temperary reducing range to make it more exciting. could result in an outofbounds
+                                           var percent = Math.round(parseFloat(msg[t].sed)*100.0);
+                                           //var percent = Math.round(((msg[t].sed+5)/10)*100);//temperary reducing range to make it more exciting. could result in an outofbounds
                                            console.log(percent);
                                            var s = "<div class='progress'>" + "<div class='progress-bar progress-bar-primary' role='progressbar' style='width:" + percent + "%'>" + percent+"%"+ "</div>" + "<div class='progress-bar progress-red' role='progressbar' style='width:" + (100 - percent) + "%'>" + (100 - percent)+"%"+ "</div>" + "</div>"
                                            document.getElementById("graph").innerHTML = s;
@@ -234,7 +239,7 @@
             <div class="container-fluid bg-1 text-center" id="container1">
                 <img src="http://49.media.tumblr.com/3a70f0cb0a934cf8684e5822cead95c7/tumblr_o3ko2kKZfX1s2wlrxo1_540.gif" class="img-responsive img-circle margin" style="display:inline" width="350" height="350">
                 <div>
-                    <table>
+                    <table style="width:100%;">
                         <tr>
                             <td class="glyphicon glyphicon-chevron-left" aria-hidden="true" onclick="decreaseTweet()" width="100px" height="50px" style="margin-top: 50px;"></td>
                             <td align="center" width="80%">

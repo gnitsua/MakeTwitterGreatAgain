@@ -22,6 +22,18 @@ var eventEmitter = new events.EventEmitter();
 var natural = require('natural');
 TfIdf = natural.TfIdf;
 
+//check for the debug flag
+if(process.argv.length > 2){
+	arg = process.argv[2];
+
+	if(arg.split('--')[1]=='debug'){
+		debug = true;
+	}
+	else{
+		debug = false;
+	}
+}
+
 app.use('/static', express.static('static'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -29,6 +41,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 var Database = require('./Database');
 var database = new Database();
 
+if(debug == true){
+	require('./training').init(app,database)	
+}
 
 //These keys are tied w/ the CS275_Group1 accont and are needed to access the api
 var twitter = new Twitter({
@@ -70,18 +85,20 @@ function checkTrump(){
 				var tweet = {tweet_id:tweets[i].id,text:tweets[i].text};
 				var cleanedTweet =  tweets[i].text.replace(/[^A-Za-z 0-9 \.,\?""!@#\$%\^&\*\(\)-_=\+;:<>\/\\\|\}\{\[\]`~]*/g, '');
 				tweet.text = cleanedTweet;
-				(function(scopedTweet){
-					database.select('trump','tweet_id='+scopedTweet["tweet_id"],null,null,null,function(row){
-					if(row.length == 0){//this means we don't have this tweet in the db
-						database.insert('trump',scopedTweet);//TODO: potential issue if the tweet contains characters that aren't supported by mysql
-						eventEmitter.emit('gotTrumpTweet',scopedTweet);
-						//console.log(scopedTweet)
-					}
-					else{
-						console.log("Already added this tweet");
-					}
-					});
-				})(tweet);
+				if(tweet.text.match(/^RT.*/g) == null){
+					(function(scopedTweet){
+						database.select('trump','tweet_id='+scopedTweet["tweet_id"],null,null,null,function(row){
+						if(row.length == 0){//this means we don't have this tweet in the db
+							database.insert('trump',scopedTweet);//TODO: potential issue if the tweet contains characters that aren't supported by mysql
+							eventEmitter.emit('gotTrumpTweet',scopedTweet);
+							//console.log(scopedTweet)
+						}
+						else{
+							console.log("Already added this tweet");
+						}
+						});
+					})(tweet);
+				}
 			}
 		}
 		else{
@@ -173,12 +190,19 @@ function calculateSed(tweet_id){
 function calculateTrumpSedAverage(trump_tweet_id){
 	//update the trump average by counting the number of trump tweets and then adding to the average
 	console.log("trump sed average")
-	database.average('replies','trump_tweet_id='+trump_tweet_id,function(row){
-		console.log("trump_tweet_id: " + trump_tweet_id + " sed: "+row[0].average);
-		database.update('trump','sed='+row[0].average,'tweet_id='+trump_tweet_id);
-	});
+	// database.average('replies','trump_tweet_id='+trump_tweet_id,function(row){
+	// 	console.log("trump_tweet_id: " + trump_tweet_id + " sed: "+row[0].average);
+	// 	database.update('trump','sed='+row[0].average,'tweet_id='+trump_tweet_id);
+	// });
+	var tump = trump_tweet_id;
 	database.count('replies','trump_tweet_id='+trump_tweet_id,function(row){
+		total = row[0].count;
 		database.update('trump','replies='+row[0].count,'tweet_id='+trump_tweet_id);
+		
+		database.count('replies','trump_tweet_id='+trump_tweet_id+' and sed < 0',function(row){
+			console.log('averaging '+trump_tweet_id+":" +row[0].count+' total: '+total);
+			database.update('trump','sed='+row[0].count/total,'tweet_id='+trump_tweet_id);
+		});
 	});
 }
 
@@ -249,7 +273,6 @@ function tfidf(){
 		}
 	});
 }
-
 //Event listeners
 eventEmitter.on('timeToGetTrumpTweet',function(){
 	checkTrump();
@@ -280,7 +303,7 @@ var topOfTheHour = new CronJob('00 00 * * * *', function() {
   'America/New_York' /* Time zone of this job. */
 );
 
-var fiveMinutes = new CronJob('00 */5 * * * *', function() {//TODO: what in order does this execute at the top of the hour
+var fiveMinutes = new CronJob('00 * * * * *', function() {//TODO: what in order does this execute at the top of the hour
   /*
    * Runs every 10 minutes '00 5-55/5 * * * *'
    */
@@ -324,19 +347,11 @@ app.get('/trumpTweet',function(req,res){
 		res.send({error:"invalid request"});
 	}
 });
-
-if(process.env.DEBUG === 'true'){
-	app.get('/secret',function(req,res){
-		res.send("shhhhhhhhhh");
-	});
-}
-
-
 app.get('/replies',function(req,res){
 	if(isNaN(req.query.page)==false){
 		limit1 = (parseInt(req.query.page)-1)*100;
 		limit2 = 100;
-		if(process.env.DEBUG === 'true'){
+		if(debug == true){
 			database.select('replies',"trump_tweet_id="+parseInt(req.query.tweet_id)+' and sed is not null' ,'tweet_id',limit1,limit2,function(row){
 				res.send(row);
 			});
@@ -352,137 +367,7 @@ app.get('/replies',function(req,res){
 	}
 });
 
-if(process.env.DEBUG === 'true'){
-	app.post('/train',function(req,res){
-		console.log(req.body)
-		if(isNaN(req.body.tweet_id)==false&&isNaN(req.body.sed_training)==false){
-			database.update('replies','sed_training='+parseInt(req.body.sed_training),'tweet_id='+parseInt(req.body.tweet_id),function(){
-				res.sendStatus(200);
-			})
-		}
-		else{
-			res.send({error:"invalid request"});
-		}
-	});
-}
-
-app.get('/tfidf',function(req,res){
-	database.select('user_words',null,'weight',null,null,function(row){
-		res.send(row);
-	});
-});
-
-app.get('/sed',function(req,res){
-	//calculateSed(req.query.tweet_id);
-	database.select('replies','tweet_id='+req.query.tweet_id,null,null,null,function(row){
-		if(row.length>1){//this should never happen
-			console.log("129: Do we have duplicate replies?");
-		}
-		var tweet = row[0];
-		if(row.length < 1){
-			res.send("error");
-			return
-		}
-		else{
-		var extraCleanTweet = tweet.text.replace(/[#|@][a-zA-Z]+/g,"");
-		
-
-		
-		database.select('user_words','weight > 1',null,null,null,function(row){
-			var extraWords = {};
-			for(i=0;i<row.length;i++){
-				extraWords[String(row[i]["term"])] = row[i]["sed"];
-			}
-
-			var r1 = sentiment(extraCleanTweet,extraWords);
-			if(r1["positive"].length < 2 && r1["negative"].length < 2){//we didn't get any good words so just don't count this one
-				r1["score"] = null;
-			}
-
-			//compare with the untrained algorithm
-			var r2 = Sentimental.analyze(extraCleanTweet);
-
-			if(r2["positive"]["words"].length < 1  && r2["negative"]["words"].length < 1){
-				r2["score"] = null;
-			}
-			res.send({"Sentimental":r2,"smart_sentiment":r1});
-
-		});
-		}
-	});
-});
-
-app.get('/tfidfer',function(req,res){
-		database.select('replies','sed_training is not null',null,null,null,function(row){
-		var data = {"positive":{},"negative":{}};
-		positive_tfidf = new TfIdf();
-		negative_tfidf = new TfIdf();
-		console.log("TFIDI of "+row.length+" documents")
-		for(i=0;i<row.length;i++){
-			if(row[i].sed > 0 && row[i].sed_training < 0){//only add document that have been marked as classified incorrectly
-				negative_tfidf.addDocument(row[i].text);
-			}
-			if(row[i].sed < 0 && row[i].sed_training > 0){
-				positive_tfidf.addDocument(row[i].text);
-			}
-		}
-		
-		console.log("positive docs: " +positive_tfidf.documents.length);
-		for(i=0;i<positive_tfidf.documents.length;i++){//get the list of terms for all positive documents
-			positive_tfidf.listTerms(i).forEach(function(term) {
-				if(term["weight"]>3){
-					if(term["term"] in data["positive"]){//we already have this word so average
-						data["positive"][term["term"]] += 1;
-					}
-					else{//this is the first time we've seen this word
-						data["positive"][term["term"]] = 1;
-					}
-				}
-			});
-		}
-		console.log("negative docs: " +negative_tfidf.documents.length);
-		for(i=0;i<negative_tfidf.documents.length;i++){//get the list of terms for all negative documents
-			negative_tfidf.listTerms(i).forEach(function(term) {
-				if(term["tfidf"]>3){
-					if(term["term"] in data["negative"]){//we already have this word so average
-						data["negative"][term["term"]] += 1;
-					}
-					else{//this is the first time we've seen this word
-						data["negative"][term["term"]] = 1;
-					}
-				}
-			});
-		}
-		for(var key in data["positive"]){//check if any word that is in positive is in negative
-			console.log(key in data["negative"]);
-			if(key in data["negative"]){//if a word is in both lists we aren't interested in it
-				console.log("in both lists: " + key);
-				delete data["negative"][String(key)];//had to the add the String() because some of our terms could be numbers and javscript can't tell the difference between a number key and an index
-				delete data["positive"][String(key)];
-
-			}
-			else{//otherwise let's save it in the database
-				console.log("add to database")
-				//database.replace('user_words',{term:key,sed:5,weight:data["negative"][key]});
-			}
-		}
-		for(var key in data["negative"]){//check if any word that is in negative is in postive
-			if(key in data["positive"]){
-				console.log("in both lists: " + key);
-				delete data["positive"][String(key)];//had to the add the String() because some of our terms could be numbers and javscript can't tell the difference between a number key and an index
-				delete data["negative"][String(key)];
-
-			}
-			else{//otherwise let's save it in the database
-				console.log("add to database")
-				//database.replace('user_words',{term:key,sed:-5,weight:data["negative"][key]});
-			}
-		}
-		res.send(data["negative"]);
-	});
-});
-
 app.listen(process.env.PORT,function(){
-	console.log("Server Running at "+process.env.PORT+" debug is "+process.env.DEBUG+"…");
+	console.log("Server Running at "+process.env.PORT+" debug is "+ debug +"…");
 });
 
