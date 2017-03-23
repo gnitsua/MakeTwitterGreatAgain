@@ -98,7 +98,8 @@ function checkReplies(){
 			console.log("got tweets:" + length);
 			for(var i = 0; i < length; i++){
 				if(tweets.statuses[i].in_reply_to_status_id!==null){
-					var cleanedTweet =  tweets.statuses[i].text.replace(/[^A-Za-z 0-9 \.,\?""!@#\$%\^&\*\(\)-_=\+;:<>\/\\\|\}\{\[\]`~]*/g, '');
+					var noDomains = tweets.statuses[i].text.replace(/https:.*\s/g,' ');
+					var cleanedTweet =  noDomains.replace(/[^A-Za-z 0-9 \.,\?""!@#\$%\^&\*\(\)-_=\+;:<>\/\\\|\}\{\[\]`~]*/g, '');
 					var tweet = {tweet_id:tweets.statuses[i].id,
 								trump_tweet_id:tweets.statuses[i].in_reply_to_status_id,
 								text:cleanedTweet};
@@ -138,51 +139,32 @@ function calculateSed(tweet_id){
 		}
 		var tweet = row[0];
 		var extraCleanTweet = tweet.text.replace(/[#|@][a-zA-Z]+/g,"");
+		
 
 		
-		database.select('user_words','weight>1',null,null,null,function(row){
+		database.select('user_words','weight > 1',null,null,null,function(row){
 			var extraWords = {};
-			for(i=0;i>row.length;i++){
-				extraWords[row[i]["term"]] = row[i]["sed"];
+			for(i=0;i<row.length;i++){
+				extraWords[String(row[i]["term"])] = row[i]["sed"];
 			}
-			var r1 = sentiment(extraCleanTweet);
-			if(r1["positive"].length < 1 &&r1["negative"].length < 1){//we didn't get any good words so just don't count this one
+			var r1 = sentiment(extraCleanTweet,extraWords);
+			if(r1["positive"].length < 2 && r1["negative"].length < 2){//we didn't get any good words so just don't count this one
 				r1["score"] = null;
 			}
 
-			var r2 = sentiment(extraCleanTweet);
-			if(r2["positive"].length < 1 &&r2["negative"].length < 1){//we didn't get any good words so just don't count this one
+			//compare with the untrained algorithm
+			var r2 = Sentimental.analyze(extraCleanTweet);
+
+			if(r2["positive"]["words"].length < 1  && r2["negative"]["words"].length < 1){
 				r2["score"] = null;
 			}
 
 			database.update('replies','sed='+r1["score"],'tweet_id='+tweet_id,function(){
 				eventEmitter.emit('newSedDataForTrumpTweet',tweet.trump_tweet_id);
 			});
-			database.update('replies','descriptor=\''+JSON.stringify({"semtiment":r1,"smart_sentiment":r2})+'\'','tweet_id='+tweet_id);
+			database.update('replies','descriptor=\''+JSON.stringify({"Sentimental":r2,"smart_sentiment":r1})+'\'','tweet_id='+tweet_id);
 
 		});
-
-		
-
-		// var r2 = Sentimental.analyze(extraCleanTweet);
-
-		// if(r2["positive"]["words"].length < 1  && r2["negative"]["words"].length < 1){
-		// 	r2["score"] = null;
-		// }
-
-		// if(r1["score"] == null){
-		// 	sed = r2["score"];
-		// }
-		// else if(r2["score"] == null){
-		// 	sed = r1["score"];
-		// }
-		// else{
-		// 	sed = (parseInt(r1["score"])+parseInt(r1["score"]))/2//start with a 50% average
-		// }
-		// database.update('replies','sed='+r1["score"],'tweet_id='+tweet_id,function(){
-		// 	eventEmitter.emit('newSedDataForTrumpTweet',tweet.trump_tweet_id);
-		// });
-		// database.update('replies','descriptor=\''+JSON.stringify({"semtiment":r1,"Sentimental":r2})+'\'','tweet_id='+tweet_id);
 	});
 	
 	
@@ -200,8 +182,72 @@ function calculateTrumpSedAverage(trump_tweet_id){
 	});
 }
 
-function learn(){
-	
+function tfidf(){
+	console.log("TFIDF Calculate")
+	database.select('replies','sed_training is not null',null,0,100,function(row){
+		var data = {"positive":{},"negative":{}};
+		positive_tfidf = new TfIdf();
+		negative_tfidf = new TfIdf();
+		console.log("TFIDI of "+row.length+" documents")
+		for(i=0;i<row.length;i++){
+			if(row[i].sed > 0 && row[i].sed_training < 0){//only add document that have been marked as classified incorrectly
+				negative_tfidf.addDocument(row[i].text);
+			}
+			if(row[i].sed < 0 && row[i].sed_training > 0){
+				positive_tfidf.addDocument(row[i].text);
+			}
+		}
+		console.log(JSON.stringify(positive_tfidf));
+		console.log("positive docs: " +positive_tfidf.documents.length);
+		for(i=0;i<positive_tfidf.documents.length;i++){//get the list of terms for all positive documents
+			positive_tfidf.listTerms(i).forEach(function(term) {
+				if(term["weight"]>3){
+					if(term["term"] in data["positive"]){//we already have this word so average
+						data["positive"][term["term"]] += 1;
+					}
+					else{//this is the first time we've seen this word
+						data["positive"][term["term"]] = 1;
+					}
+				}
+			});
+		}
+		console.log("negative docs: " +negative_tfidf.documents.length);
+		for(i=0;i<negative_tfidf.documents.length;i++){//get the list of terms for all negative documents
+			negative_tfidf.listTerms(i).forEach(function(term) {
+				if(term["tfidf"]>3){
+					if(term["term"] in data["negative"]){//we already have this word so average
+						data["negative"][term["term"]] += 1;
+					}
+					else{//this is the first time we've seen this word
+						data["negative"][term["term"]] = 1;
+					}
+				}
+			});
+		}
+		for(var key in data["positive"]){//check if any word that is in positive is in negative
+			console.log(key in data["negative"]);
+			if(key in data["negative"]){//if a word is in both lists we aren't interested in it
+				console.log("in both lists: " + key);
+				delete data["negative"][String(key)];//had to the add the String() because some of our terms could be numbers and javscript can't tell the difference between a number key and an index
+				delete data["positive"][String(key)];
+
+			}
+			else{//otherwise let's save it in the database
+				database.replace('user_words',{term:key,sed:data["positive"][key],weight:data["positive"][key]});
+			}
+		}
+		for(var key in data["negative"]){//check if any word that is in negative is in postive
+			if(key in data["positive"]){
+				console.log("in both lists: " + key);
+				delete data["positive"][String(key)];//had to the add the String() because some of our terms could be numbers and javscript can't tell the difference between a number key and an index
+				delete data["negative"][String(key)];
+
+			}
+			else{//otherwise let's save it in the database
+				database.replace('user_words',{term:key,sed:-1*data["negative"][key],weight:data["negative"][key]});
+			}
+		}
+	});
 }
 
 //Event listeners
@@ -247,6 +293,19 @@ var fiveMinutes = new CronJob('00 */5 * * * *', function() {//TODO: what in orde
   'America/New_York' /* Time zone of this job. */
 );
 
+var halfhour = new CronJob('00 00,30 * * * *', function() {//TODO: what in order does this execute at the top of the hour
+  /*
+   * Runs every 30 minutes
+   */
+   tfidf();
+  }, function () {
+    /* This function is executed when the job stops */
+  },
+  true, /* Start the job right now */
+  'America/New_York' /* Time zone of this job. */
+);
+
+
 app.use('/static', express.static('public'));
 
 app.get('/',function(req,res){
@@ -270,7 +329,7 @@ app.get('/replies',function(req,res){
 	if(isNaN(req.query.page)==false){
 		limit1 = (parseInt(req.query.page)-1)*100;
 		limit2 = 100;
-		database.select('replies',"trump_tweet_id="+parseInt(req.query.tweet_id),'tweet_id',limit1,limit2,function(row){
+		database.select('replies',"trump_tweet_id="+parseInt(req.query.tweet_id)+' and sed is not null' ,'tweet_id',limit1,limit2,function(row){
 			res.send(row);
 		});
 	}
@@ -292,6 +351,52 @@ app.post('/train',function(req,res){
 });
 
 app.get('/tfidf',function(req,res){
+	database.select('user_words',null,'weight',null,null,function(row){
+		res.send(row);
+	});
+});
+
+app.get('/sed',function(req,res){
+	//calculateSed(req.query.tweet_id);
+	database.select('replies','tweet_id='+req.query.tweet_id,null,null,null,function(row){
+		if(row.length>1){//this should never happen
+			console.log("129: Do we have duplicate replies?");
+		}
+		var tweet = row[0];
+		if(row.length < 1){
+			res.send("error");
+			return
+		}
+		else{
+		var extraCleanTweet = tweet.text.replace(/[#|@][a-zA-Z]+/g,"");
+		
+
+		
+		database.select('user_words','weight > 1',null,null,null,function(row){
+			var extraWords = {};
+			for(i=0;i<row.length;i++){
+				extraWords[String(row[i]["term"])] = row[i]["sed"];
+			}
+
+			var r1 = sentiment(extraCleanTweet,extraWords);
+			if(r1["positive"].length < 2 && r1["negative"].length < 2){//we didn't get any good words so just don't count this one
+				r1["score"] = null;
+			}
+
+			//compare with the untrained algorithm
+			var r2 = Sentimental.analyze(extraCleanTweet);
+
+			if(r2["positive"]["words"].length < 1  && r2["negative"]["words"].length < 1){
+				r2["score"] = null;
+			}
+			res.send({"Sentimental":r2,"smart_sentiment":r1});
+
+		});
+		}
+	});
+});
+
+app.get('/tfidfer',function(req,res){
 	database.select('replies','sed_training is not null',null,0,100,function(row){
 		var data = {"positive":{},"negative":{}};
 		positive_tfidf = new TfIdf();
@@ -305,25 +410,30 @@ app.get('/tfidf',function(req,res){
 				positive_tfidf.addDocument(row[i].text);
 			}
 		}
+		
 		console.log("positive docs: " +positive_tfidf.documents.length);
 		for(i=0;i<positive_tfidf.documents.length;i++){//get the list of terms for all positive documents
 			positive_tfidf.listTerms(i).forEach(function(term) {
-				if(term["term"] in data["positive"]){//we already have this word so average
-					data["positive"][term["term"]] = (data["positive"][term["term"]]+term["tfidf"])/2;
-				}
-				else{//this is the first time we've seen this word
-					data["positive"][term["term"]] = term["tfidf"];
+				if(term["weight"]>3){
+					if(term["term"] in data["positive"]){//we already have this word so average
+						data["positive"][term["term"]] += 1;
+					}
+					else{//this is the first time we've seen this word
+						data["positive"][term["term"]] = 1;
+					}
 				}
 			});
 		}
 		console.log("negative docs: " +negative_tfidf.documents.length);
 		for(i=0;i<negative_tfidf.documents.length;i++){//get the list of terms for all negative documents
 			negative_tfidf.listTerms(i).forEach(function(term) {
-				if(term["term"] in data["negative"]){//we already have this word so average
-					data["negative"][term["term"]] = (data["negative"][term["term"]]+term["tfidf"])/2;
-				}
-				else{//this is the first time we've seen this word
-					data["negative"][term["term"]] = term["tfidf"];
+				if(term["tfidf"]>3){
+					if(term["term"] in data["negative"]){//we already have this word so average
+						data["negative"][term["term"]] += 1;
+					}
+					else{//this is the first time we've seen this word
+						data["negative"][term["term"]] = 1;
+					}
 				}
 			});
 		}
@@ -337,7 +447,7 @@ app.get('/tfidf',function(req,res){
 			}
 			else{//otherwise let's save it in the database
 				console.log("add to database")
-				database.replace('user_words',{term:key,sed:5,weight:data["negative"][key]});
+				//database.replace('user_words',{term:key,sed:5,weight:data["negative"][key]});
 			}
 		}
 		for(var key in data["negative"]){//check if any word that is in negative is in postive
@@ -349,14 +459,14 @@ app.get('/tfidf',function(req,res){
 			}
 			else{//otherwise let's save it in the database
 				console.log("add to database")
-				database.replace('user_words',{term:key,sed:-5,weight:data["negative"][key]});
+				//database.replace('user_words',{term:key,sed:-5,weight:data["negative"][key]});
 			}
 		}
-
-		res.send(data);
+		res.send(data["negative"]);
 	});
 });
 
 app.listen(process.env.PORT,function(){
 	console.log("Server Running at "+process.env.PORT+"…");
 });
+
