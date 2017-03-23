@@ -336,26 +336,35 @@ app.get('/replies',function(req,res){
 	if(isNaN(req.query.page)==false){
 		limit1 = (parseInt(req.query.page)-1)*100;
 		limit2 = 100;
-		database.select('replies',"trump_tweet_id="+parseInt(req.query.tweet_id)+' and sed is not null' ,'tweet_id',limit1,limit2,function(row){
-			res.send(row);
-		});
+		if(process.env.DEBUG === 'true'){
+			database.select('replies',"trump_tweet_id="+parseInt(req.query.tweet_id)+' and sed is not null' ,'tweet_id',limit1,limit2,function(row){
+				res.send(row);
+			});
+		}
+		else{
+			database.select('replies',"trump_tweet_id="+parseInt(req.query.tweet_id)+' and sed is not null and sed_training is null' ,'tweet_id',limit1,limit2,function(row){
+				res.send(row);
+			});
+		}
 	}
 	else{
 		res.send({error:"invalid request"});
 	}
 });
 
-app.post('/train',function(req,res){
-	console.log(req.body)
-	if(isNaN(req.body.tweet_id)==false&&isNaN(req.body.sed_training)==false){
-		database.update('replies','sed_training='+parseInt(req.body.sed_training),'tweet_id='+parseInt(req.body.tweet_id),function(){
-			res.sendStatus(200);
-		})
-	}
-	else{
-		res.send({error:"invalid request"});
-	}
-});
+if(process.env.DEBUG === 'true'){
+	app.post('/train',function(req,res){
+		console.log(req.body)
+		if(isNaN(req.body.tweet_id)==false&&isNaN(req.body.sed_training)==false){
+			database.update('replies','sed_training='+parseInt(req.body.sed_training),'tweet_id='+parseInt(req.body.tweet_id),function(){
+				res.sendStatus(200);
+			})
+		}
+		else{
+			res.send({error:"invalid request"});
+		}
+	});
+}
 
 app.get('/tfidf',function(req,res){
 	database.select('user_words',null,'weight',null,null,function(row){
@@ -404,7 +413,7 @@ app.get('/sed',function(req,res){
 });
 
 app.get('/tfidfer',function(req,res){
-	database.select('replies','sed_training is not null',null,0,100,function(row){
+	database.select('replies','sed_training is not null',null,null,null,function(row){
 		var data = {"positive":{},"negative":{}};
 		positive_tfidf = new TfIdf();
 		negative_tfidf = new TfIdf();

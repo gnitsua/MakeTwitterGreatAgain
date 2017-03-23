@@ -37,6 +37,9 @@
                                 }
                                 initHome(page);
                             }
+                            function train(tweet_id,sed){
+                                 $.post( "/train", { tweet_id: tweet_id, sed_training: sed } );
+                             }
                         
                             function initHome(t) {
                                     var URL = "trumpTweet?page=1"
@@ -74,11 +77,11 @@
                                                           var tweet = msg[i].text
                                                           var val = msg[i].sed
                                                           if (val > 0 || val == null) {
-                                                               strp += "<div class='panel panel-primary'>" + "<div class='panel-heading highlight'>" + "<h4 class='panel-title'> <a class='accordion-toggle' data-toggle='collapse' data-parent='#accordion' href='#collapse"+i+"'> <i class='indicator glyphicon glyphicon-minus'></i> Tweet "+(i+1)+"</a> </h4> </div>"+"<div id='collapse"+i+"' class='panel-collapse collapse in'> <div class='panel-body'> "+tweet+" </div>" +"<button type='button' class='btn btn-success' onclick='train("+tweet_id+",1);'>Right</button><button type='button' class='btn btn-danger' onclick='train("+tweet_id+",-1);'>Wrong</button></div></div>"
+                                                               strp += "<div class='panel panel-primary'>" + "<div class='panel-heading highlight'>" + "<h4 class='panel-title'><span class='glyphicon glyphicon-plus' onclick='train("+tweet_id+",1);this.className += \" text-danger\";'></span> <a class='accordion-toggle' data-toggle='collapse' data-parent='#accordion' href='#collapse"+i+"'>  Tweet "+(i+1)+"</a> <span class='glyphicon glyphicon-minus' onclick='train("+tweet_id+",-1);this.className += \" text-danger\";'></span> </h4> </div>"+"<div id='collapse"+i+"' class='panel-collapse collapse in'> <div class='panel-body'> "+tweet+" </div>" +"</div></div>"
                                                           
                                                           }
                                                           else if (val < 0) {
-                                                              strn += "<div class='panel panel-primary'>" + "<div class='panel-heading highlight' style='background:#ff4f42;'>" + "<h4 class='panel-title'> <a class='accordion-toggle' data-toggle='collapse' data-parent='#accordion' href='#collapse"+i+"'> <i class='indicator glyphicon glyphicon-minus'></i> Tweet "+(i+1)+"</a> </h4> </div>"+"<div id='collapse"+i+"' class='panel-collapse collapse in'> <div class='panel-body'> "+tweet+" </div>" +"<button type='button' class='btn btn-success' onclick='train("+tweet_id+",-1);'>Right</button><button type='button' class='btn btn-danger' onclick='train("+tweet_id+",1);'>Wrong</button></div></div>";
+                                                              strn += "<div class='panel panel-primary'>" + "<div class='panel-heading highlight' style='background:#ff4f42;'>" + "<h4 class='panel-title'><span class='glyphicon glyphicon-plus' onclick='train("+tweet_id+",-1);this.className += \" text-primary\";'></span> <a class='accordion-toggle' data-toggle='collapse' data-parent='#accordion' href='#collapse"+i+"'>  Tweet "+(i+1)+"</a> <span class='glyphicon glyphicon-minus' onclick='train("+tweet_id+",1);this.className += \" text-primary\";'></span> </h4> </div>"+"<div id='collapse"+i+"' class='panel-collapse collapse in'> <div class='panel-body'> "+tweet+" </div>" +"</div></div>";
                                                   
                                                           }
                                                           else {
