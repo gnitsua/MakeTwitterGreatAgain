@@ -413,7 +413,7 @@ app.get('/sed',function(req,res){
 });
 
 app.get('/tfidfer',function(req,res){
-	database.select('replies','sed_training is not null',null,null,null,function(row){
+		database.select('replies','sed_training is not null',null,null,null,function(row){
 		var data = {"positive":{},"negative":{}};
 		positive_tfidf = new TfIdf();
 		negative_tfidf = new TfIdf();
