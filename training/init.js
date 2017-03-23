@@ -76,10 +76,10 @@ function initTraining(app,database){
 			// 	positive_tfidf.addDocument(row[i].text);
 			// }
 			if(row[i].sed > 0){//only add document that have been marked as classified incorrectly
-				negative_tfidf.addDocument(row[i].text);
+				positive_tfidf.addDocument(row[i].text);
 			}
 			if(row[i].sed < 0){
-				positive_tfidf.addDocument(row[i].text);
+				negative_tfidf.addDocument(row[i].text);
 			}
 		}
 		console.log("positive docs: " +positive_tfidf.documents.length);
