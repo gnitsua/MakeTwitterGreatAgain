@@ -195,6 +195,13 @@ app.get('/trumpTweet',function(req,res){
 	}
 });
 
+if(process.env.DEBUG === 'true'){
+	app.get('/secret',function(req,res){
+		res.send("shhhhhhhhhh");
+	});
+}
+
+
 app.get('/replies',function(req,res){
 	if(isNaN(req.query.page)==false){
 		limit1 = (parseInt(req.query.page)-1)*100;
@@ -209,5 +216,5 @@ app.get('/replies',function(req,res){
 });
 
 app.listen(process.env.PORT,function(){
-	console.log("Server Running at "+process.env.PORT+"…");
+	console.log("Server Running at "+process.env.PORT+" debug is "+process.env.DEBUG+"…");
 });
