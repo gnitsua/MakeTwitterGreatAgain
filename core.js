@@ -355,7 +355,7 @@ var fiveMinutes = new CronJob('00 * * * * *', function() {//TODO: what in order 
   'America/New_York' /* Time zone of this job. */
 );
 
-var halfhour = new CronJob('00 * * * * *', function() {//TODO: what in order does this execute at the top of the hour
+var halfhour = new CronJob('00 */5 * * * *', function() {//TODO: what in order does this execute at the top of the hour
   /*
    * Runs every 30 minutes
    */
