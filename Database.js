@@ -78,8 +78,7 @@ function Database(){
           		return;
         	} 
         	else{
-				console.log("replacing");
-				//console.log(data);
+				console.log("REPLACE INTO "+table+" SET "+ data);
 				con.query('REPLACE INTO '+table+' SET ?', data, function(err,res){
 					con.release();
   					if(err) throw err;
@@ -186,6 +185,26 @@ function Database(){
         });
 		
 	};
+	Database.prototype.query = function(data,callback) {
+		pool.getConnection(function(err,con){
+        	if (err) {
+          		console.log("54: Error in connection database");
+          		return;
+        	} 
+        	else{
+				console.log("inserting");
+				//console.log(data);
+				con.query(data, function(err,res){
+					con.release();
+  					if(err) throw err;
+					console.log('Last insert ID:', res.insertId);
+					if(callback !== undefined){
+						callback(res.insertId);
+					}
+				});
+        	}
+        });
+	}
 }
 
 module.exports = Database;

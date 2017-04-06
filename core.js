@@ -57,16 +57,16 @@ var twitter = new Twitter({
 //Functions the server does
 function cleanDatabase(){
 	console.log('Cleaning');
-	database.select('trump',null,10,100,function(row){
+	database.select('trump',null,'tweet_id',10,100,function(row){
 		var length = row.length;
 		for(var i = 0; i < length; i++){
 			var tweet = {tweet_id:row[i].tweet_id,text:row[i].text};
 			(function(scopedTweet){
-				console.log('should delete '+ tweet.tweet_id)
-				database.delete('replies','trump_tweet_id='+tweet.tweet_id,function(){
-					console.log("deleted all replies for tweet: "+tweet.tweet_id);
-					database.delete('trump','tweet_id='+tweet.tweet_id,function(){
-						console.log('deleted trump tweet: '+tweet.tweet_id);
+				console.log('should delete '+ scopedTweet.tweet_id)
+				database.delete('replies','trump_tweet_id='+scopedTweet.tweet_id,function(){
+					console.log("deleted all replies for tweet: "+scopedTweet.tweet_id);
+					database.delete('trump','tweet_id='+scopedTweet.tweet_id,function(){
+						console.log('deleted trump tweet: '+scopedTweet.tweet_id);
 					});
 				});
 			})(tweet);
@@ -89,7 +89,7 @@ function checkTrump(){
 						database.select('trump','tweet_id='+scopedTweet["tweet_id"],null,null,null,function(row){
 						if(row.length == 0){//this means we don't have this tweet in the db
 							database.insert('trump',scopedTweet);//TODO: potential issue if the tweet contains characters that aren't supported by mysql
-							eventEmitter.emit('gotTrumpTweet',scopedTweet);
+							//eventEmitter.emit('gotTrumpTweet',scopedTweet);//TODO:this is causing replies to be checked a million times right now
 							//console.log(scopedTweet)
 						}
 						else{
@@ -156,9 +156,7 @@ function calculateSed(tweet_id){
 		var tweet = row[0];
 		var extraCleanTweet = tweet.text.replace(/[#|@][a-zA-Z]+/g,"");
 		
-
-		
-		database.select('user_words','weight > 1',null,null,null,function(row){
+		database.select('user_words','weight > 1','weight',0,100,function(row){
 			var extraWords = {};
 			for(i=0;i<row.length;i++){
 				extraWords[String(row[i]["term"])] = row[i]["sed"];
@@ -187,13 +185,13 @@ function calculateSed(tweet_id){
 }
 
 function calculateTrumpSedAverage(trump_tweet_id){
-	//update the trump average by counting the number of trump tweets and then adding to the average
 	console.log("trump sed average")
+	//in this version we average the sediment
 	// database.average('replies','trump_tweet_id='+trump_tweet_id,function(row){
 	// 	console.log("trump_tweet_id: " + trump_tweet_id + " sed: "+row[0].average);
 	// 	database.update('trump','sed='+row[0].average,'tweet_id='+trump_tweet_id);
 	// });
-	var tump = trump_tweet_id;
+	//in this version we get the percent negative/positive
 	database.count('replies','trump_tweet_id='+trump_tweet_id,function(row){
 		total = row[0].count;
 		database.update('trump','replies='+row[0].count,'tweet_id='+trump_tweet_id);
@@ -207,69 +205,111 @@ function calculateTrumpSedAverage(trump_tweet_id){
 
 function tfidf(){
 	console.log("TFIDF Calculate")
-	database.select('replies','sed_training is not null',null,0,100,function(row){
-		var data = {"positive":{},"negative":{}};
-		positive_tfidf = new TfIdf();
-		negative_tfidf = new TfIdf();
-		console.log("TFIDI of "+row.length+" documents")
-		for(i=0;i<row.length;i++){
-			if(row[i].sed > 0 && row[i].sed_training < 0){//only add document that have been marked as classified incorrectly
-				negative_tfidf.addDocument(row[i].text);
+	database.select('replies',null,null,0,1000,function(row){//get the most recent 1000 replies
+		database.select('user_words',null,null,null,null,function(user_words_row){//get all of the user words
+			var data = {"positive":{},"negative":{}};
+			for(i=0;i<user_words_row.length;i++){//add all the exisiting user words to the user words
+				if(user_words_row[i].sed > 0){
+					data["positive"][user_words_row[i].term] = user_words_row[i].weight;
+				}
+				else if(user_words_row[i].sed < 0){
+					data["negative"][user_words_row[i].term] = user_words_row[i].weight;
+				}
+				else{
+					console.log("219: not positive or negative?")
+				}
 			}
-			if(row[i].sed < 0 && row[i].sed_training > 0){
-				positive_tfidf.addDocument(row[i].text);
+			positive_tfidf = new TfIdf();
+			negative_tfidf = new TfIdf();
+			console.log("TFIDI of "+row.length+" documents")
+			for(i=0;i<row.length;i++){
+				if(row[i].sed < 0){
+					negative_tfidf.addDocument(row[i].text);
+				}
+				if(row[i].sed > 0){
+					positive_tfidf.addDocument(row[i].text);
+				}
 			}
-		}
-		console.log(JSON.stringify(positive_tfidf));
-		console.log("positive docs: " +positive_tfidf.documents.length);
-		for(i=0;i<positive_tfidf.documents.length;i++){//get the list of terms for all positive documents
-			positive_tfidf.listTerms(i).forEach(function(term) {
-				if(term["weight"]>3){
-					if(term["term"] in data["positive"]){//we already have this word so average
-						data["positive"][term["term"]] += 1;
+			console.log("positive docs: " +positive_tfidf.documents.length);
+			for(i=0;i<positive_tfidf.documents.length;i++){//get the list of terms for all positive documents
+				positive_tfidf.listTerms(i).forEach(function(term) {
+					if(term["weight"]>3 && term["term"].length<40){//had to add the length limit because the database won't take words that long
+						if(term["term"] in data["positive"]){//we already have this word so average
+							data["positive"][term["term"]] += 1;
+						}
+						else{//this is the first time we've seen this word
+							data["positive"][term["term"]] = 1;
+						}
 					}
-					else{//this is the first time we've seen this word
-						data["positive"][term["term"]] = 1;
+				});
+			}
+			console.log("negative docs: " +negative_tfidf.documents.length);
+			for(i=0;i<negative_tfidf.documents.length;i++){//get the list of terms for all negative documents
+				negative_tfidf.listTerms(i).forEach(function(term) {
+					if(term["tfidf"]>3){
+						if(term["term"] in data["negative"]){//we already have this word so average
+							data["negative"][term["term"]] += 1;
+						}
+						else{//this is the first time we've seen this word
+							data["negative"][term["term"]] = 1;
+						}
+					}
+				});
+			}
+			database.query('delete from user_words',function(){//clear the list of user words before added in the new words
+				var sortedPositive = [];
+				for(var key in data["positive"]){//check if any word that is in positive is in negative
+					if(key in data["negative"]){//if a word is in both lists we aren't interested in it
+						console.log("in both lists: " + key);
+						delete data["negative"][String(key)];//had to the add the String() because some of our terms could be numbers and javscript can't tell the difference between a number key and an index
+						delete data["positive"][String(key)];
+
+					}
+					else{//otherwise let's add it to a list that we can sort
+						sortedPositive.push([key,data["positive"][String(key)]]);
 					}
 				}
-			});
-		}
-		console.log("negative docs: " +negative_tfidf.documents.length);
-		for(i=0;i<negative_tfidf.documents.length;i++){//get the list of terms for all negative documents
-			negative_tfidf.listTerms(i).forEach(function(term) {
-				if(term["tfidf"]>3){
-					if(term["term"] in data["negative"]){//we already have this word so average
-						data["negative"][term["term"]] += 1;
+				sortedPositive.sort(function(a,b){
+					return b[1]-a[1];
+				});
+
+				var length = sortedPositive.length > 100 ? 100 : sortedPositive.length;				
+				totalPositive = 0;//TODO:this should be a function and can we do it more efficently?
+				for(i=0;i<length;i++){
+					totalPositive += sortedPositive[i][1];
+				}
+				for(i=0;i<length;i++){//add the top 100 words to the user words list
+					//sed = weight of current word/sum of all word weights then scaled to 0-5
+					database.insert('user_words',{term:sortedPositive[i][0],sed:(sortedPositive[i][1]/totalPositive)*5,weight:sortedPositive[i][1]});
+				}
+
+				var sortedNegative = [];
+				for(var key in data["negative"]){//check if any word that is in negative is in postive
+					if(key in data["positive"]){
+						console.log("in both lists: " + key);
+						delete data["positive"][String(key)];//had to the add the String() because some of our terms could be numbers and javscript can't tell the difference between a number key and an index
+						delete data["negative"][String(key)];
+
 					}
-					else{//this is the first time we've seen this word
-						data["negative"][term["term"]] = 1;
+					else{
+						sortedNegative.push([key,data["negative"][String(key)]]);
 					}
 				}
+				sortedNegative.sort(function(a,b){
+					return b[1]-a[1];
+				});
+
+				var length = sortedNegative.length > 100 ? 100 : sortedNegative.length;				
+				totalNegative = 0;
+				for(i=0;i<length;i++){
+					totalNegative += sortedNegative[i][1];
+				}
+				for(i=0;i<length;i++){//add the top 100 words to the user words list
+					//sed = weight of current word/sum of all word weights then scales to 0-5
+					database.insert('user_words',{term:sortedNegative[i][0],sed:-(sortedNegative[i][1]/totalNegative)*5,weight:sortedNegative[i][1]});
+				}
 			});
-		}
-		for(var key in data["positive"]){//check if any word that is in positive is in negative
-			console.log(key in data["negative"]);
-			if(key in data["negative"]){//if a word is in both lists we aren't interested in it
-				console.log("in both lists: " + key);
-				delete data["negative"][String(key)];//had to the add the String() because some of our terms could be numbers and javscript can't tell the difference between a number key and an index
-				delete data["positive"][String(key)];
-
-			}
-			else{//otherwise let's save it in the database
-				database.replace('user_words',{term:key,sed:data["positive"][key],weight:data["positive"][key]});
-			}
-		}
-		for(var key in data["negative"]){//check if any word that is in negative is in postive
-			if(key in data["positive"]){
-				console.log("in both lists: " + key);
-				delete data["positive"][String(key)];//had to the add the String() because some of our terms could be numbers and javscript can't tell the difference between a number key and an index
-				delete data["negative"][String(key)];
-
-			}
-			else{//otherwise let's save it in the database
-				database.replace('user_words',{term:key,sed:-1*data["negative"][key],weight:data["negative"][key]});
-			}
-		}
+		});
 	});
 }
 //Event listeners
@@ -294,9 +334,9 @@ var topOfTheHour = new CronJob('00 00 * * * *', function() {
    * Runs every hour at 00:00
    */
 	eventEmitter.emit('timeToGetTrumpTweet');
+	eventEmitter.emit('cleanUpTime');
   }, function () {
     /* This function is executed when the job stops */
-    eventEmitter.emit('cleanUpTime');
   },
   true, /* Start the job right now */
   'America/New_York' /* Time zone of this job. */
@@ -315,7 +355,7 @@ var fiveMinutes = new CronJob('00 * * * * *', function() {//TODO: what in order 
   'America/New_York' /* Time zone of this job. */
 );
 
-var halfhour = new CronJob('00 00,30 * * * *', function() {//TODO: what in order does this execute at the top of the hour
+var halfhour = new CronJob('00 * * * * *', function() {//TODO: what in order does this execute at the top of the hour
   /*
    * Runs every 30 minutes
    */
