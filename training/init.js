@@ -11,13 +11,6 @@ function initTraining(app,database){
 		}
 	});
 
-
-	app.get('/userwords',function(req,res){
-		database.select('user_words',null,'weight',null,null,function(row){
-			res.send(row);
-		});
-	});
-
 	app.get('/tweet_sed',function(req,res){
 		if(isNaN(req.query.tweet_id)==false){
 			database.select('replies','tweet_id='+parseInt(req.query.tweet_id),null,null,null,function(row){

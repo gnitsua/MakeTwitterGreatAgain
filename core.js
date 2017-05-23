@@ -210,10 +210,10 @@ function tfidf(){
 			var data = {"positive":{},"negative":{}};
 			for(i=0;i<user_words_row.length;i++){//add all the exisiting user words to the user words
 				if(user_words_row[i].sed > 0){
-					data["positive"][user_words_row[i].term] = user_words_row[i].weight;
+					data["positive"][user_words_row[i].term] = user_words_row[i].weight*0.66;
 				}
 				else if(user_words_row[i].sed < 0){
-					data["negative"][user_words_row[i].term] = user_words_row[i].weight;
+					data["negative"][user_words_row[i].term] = user_words_row[i].weight*0.66;
 				}
 				else{
 					console.log("219: not positive or negative?")
@@ -280,7 +280,7 @@ function tfidf(){
 				}
 				for(i=0;i<length;i++){//add the top 100 words to the user words list
 					//sed = weight of current word/sum of all word weights then scaled to 0-5
-					database.insert('user_words',{term:sortedPositive[i][0],sed:(sortedPositive[i][1]/totalPositive)*5,weight:sortedPositive[i][1]});
+					database.insert('user_words',{term:sortedPositive[i][0],sed:(sortedPositive[i][1]/totalPositive)*50,weight:sortedPositive[i][1]});
 				}
 
 				var sortedNegative = [];
@@ -342,7 +342,7 @@ var topOfTheHour = new CronJob('00 00 * * * *', function() {
   'America/New_York' /* Time zone of this job. */
 );
 
-var fiveMinutes = new CronJob('00 * * * * *', function() {//TODO: what in order does this execute at the top of the hour
+var fiveMinutes = new CronJob('00 */5 * * * *', function() {//TODO: what in order does this execute at the top of the hour
   /*
    * Runs every 10 minutes '00 5-55/5 * * * *'
    */
@@ -355,7 +355,7 @@ var fiveMinutes = new CronJob('00 * * * * *', function() {//TODO: what in order 
   'America/New_York' /* Time zone of this job. */
 );
 
-var halfhour = new CronJob('00 */5 * * * *', function() {//TODO: what in order does this execute at the top of the hour
+var halfhour = new CronJob('00 30 * * * *', function() {//TODO: what in order does this execute at the top of the hour
   /*
    * Runs every 30 minutes
    */
@@ -405,6 +405,13 @@ app.get('/replies',function(req,res){
 		res.send({error:"invalid request"});
 	}
 });
+
+app.get('/userwords',function(req,res){
+	database.select('user_words',null,'weight',null,null,function(row){
+		res.send(row);
+	});
+});
+
 
 app.listen(process.env.PORT,function(){
 	console.log("Server Running at "+process.env.PORT+" debug is "+ debug +"…");
