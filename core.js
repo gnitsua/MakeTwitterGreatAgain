@@ -52,6 +52,15 @@ var twitter = new Twitter({
 	access_token_secret: process.env.ACCESS_TOKEN_SECRET
 });
 
+// create a rolling file logger based on date/time that fires process events
+const opts = {
+    errorEventName:'error',
+    logDirectory:'user_words_logs',
+    fileNamePattern:'roll-<DATE>.log',
+    dateFormat:'YYYY.MM.DD'
+};
+
+const log = require('simple-node-logger').createRollingFileLogger( opts );
 
 
 //Functions the server does
@@ -207,6 +216,7 @@ function tfidf(){
 	console.log("TFIDF Calculate")
 	database.select('replies',null,null,0,1000,function(row){//get the most recent 1000 replies
 		database.select('user_words',null,null,null,null,function(user_words_row){//get all of the user words
+			log.info(user_words_row);//log the existing user words for furutre reference
 			var data = {"positive":{},"negative":{}};
 			for(i=0;i<user_words_row.length;i++){//add all the exisiting user words to the user words
 				if(user_words_row[i].sed > 0){
@@ -280,7 +290,11 @@ function tfidf(){
 				}
 				for(i=0;i<length;i++){//add the top 100 words to the user words list
 					//sed = weight of current word/sum of all word weights then scaled to 0-5
-					database.insert('user_words',{term:sortedPositive[i][0],sed:(sortedPositive[i][1]/totalPositive)*50,weight:sortedPositive[i][1]});
+					sed = (sortedPositive[i][1]/totalPositive)*50
+					if(sed > 5){
+						sed = 5
+					}
+					database.insert('user_words',{term:sortedPositive[i][0],sed:sed,weight:sortedPositive[i][1]});
 				}
 
 				var sortedNegative = [];
@@ -306,7 +320,11 @@ function tfidf(){
 				}
 				for(i=0;i<length;i++){//add the top 100 words to the user words list
 					//sed = weight of current word/sum of all word weights then scales to 0-5
-					database.insert('user_words',{term:sortedNegative[i][0],sed:-(sortedNegative[i][1]/totalNegative)*5,weight:sortedNegative[i][1]});
+					sed = -(sortedNegative[i][1]/totalNegative)*50
+					if(sed < -5){
+						sed = -5
+					}
+					database.insert('user_words',{term:sortedNegative[i][0],sed:sed,weight:sortedNegative[i][1]});
 				}
 			});
 		});
