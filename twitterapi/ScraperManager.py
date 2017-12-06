@@ -7,7 +7,8 @@ from tweepy import OAuthHandler
 from threading import Timer
 from kafka import SimpleClient
 from kafka import SimpleProducer
-from kafka.errors import  KafkaUnavailableError
+from kafka.errors import KafkaUnavailableError
+
 
 class ScraperManger:
     def __init__(self):
