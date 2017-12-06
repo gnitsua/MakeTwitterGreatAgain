@@ -13,7 +13,7 @@ class SearchScraper():
         self.producer = producer
 
     def get_tweets(self):
-        results = self.api.search(q=self.search_string, results_type="recent", count=100)
+        results = self.api.search(q=self.search_string, results_type="recent", count=100,tweet_mode="extended")
         for result in results:
             logging.debug(result._json)
             self.producer.send_messages(self.name, json.dumps(result._json).encode('utf-8'))

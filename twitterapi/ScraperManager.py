@@ -7,7 +7,7 @@ from tweepy import OAuthHandler
 from threading import Timer
 from kafka import SimpleClient
 from kafka import SimpleProducer
-
+from kafka.errors import  KafkaUnavailableError
 
 class ScraperManger:
     def __init__(self):
@@ -21,7 +21,7 @@ class ScraperManger:
 
         try:
             kafka = SimpleClient("192.168.99.100:9092")
-        except kafka.errors.KafkaUnavailableError as e:
+        except KafkaUnavailableError as e:
             logging.error("Could not connect to Kafka")
             raise e
 
