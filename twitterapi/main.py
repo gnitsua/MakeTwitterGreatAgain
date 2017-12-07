@@ -2,7 +2,7 @@ import json
 import logging
 from ScraperManager import ScraperManger
 
-logging.getLogger().setLevel(logging.DEBUG)
+# logging.getLogger().setLevel(logging.DEBUG)
 
 try:
     with open("scrapers.json") as file:
