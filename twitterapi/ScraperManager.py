@@ -19,9 +19,10 @@ class ScraperManger:
         self.api = tweepy.API(auth_handler=auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
         self.rate_limit = config.get_key("RATE_LIMIT")
         self.scrapers = []
+        kafka_url = "{:s}:{:s}".format(config.get_key("KAFKA_HOST"), config.get_key("KAFKA_PORT"))
 
         try:
-            kafka = SimpleClient("192.168.99.100:9092")
+            kafka = SimpleClient(kafka_url)
         except KafkaUnavailableError as e:
             logging.error("Could not connect to Kafka")
             raise e

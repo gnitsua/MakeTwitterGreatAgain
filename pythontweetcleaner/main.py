@@ -59,8 +59,7 @@ lines = kafkaStream.map(lambda x: json.loads(x[1])) \
                        "in_reply_to_status_id": line["in_reply_to_status_id"]}) \
     .map(lambda line: (line.update({"cleaned": line["full_text"].lower()}) or line)) \
     .map(lambda line: (line.update({"cleaned": ' '.join(
-    re.sub("(@[A-Za-z0-9]+)|([^0-9A-Za-z \t])|(\w+:\/\/\S+)", " ", line["cleaned"]).split())}) or line)) \
- \
+    re.sub("(@[A-Za-z0-9]+)|([^0-9A-Za-z \t])|(\w+:\/\/\S+)", " ", line["cleaned"]).split())}) or line))
 lines.foreachRDD(handler)  # send cleaned tweets to kafka
 lines.pprint()
 
