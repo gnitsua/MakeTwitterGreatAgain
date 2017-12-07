@@ -8,6 +8,10 @@ from pyspark import SparkContext
 from pyspark.streaming import StreamingContext
 from pyspark.streaming.kafka import KafkaUtils
 from ConfigReader import ConfigReader
+from kafka import SimpleProducer
+from kafka import SimpleClient
+from kafka.errors import KafkaUnavailableError
+from kafka.errors import FailedPayloadsError
 
 try:
     with open("data/AFINN-96.txt") as file:
@@ -26,6 +30,7 @@ config = ConfigReader("config.json")
 
 zookeeper_url = "{:s}:{:s}".format(config.get_key("ZOOKEEPER_HOST"), config.get_key("ZOOKEEPER_PORT"))
 kafka_topic = config.get_key("KAFKA_TOPIC")
+output_topic = config.get_key("KAFKA_OUTPUT_TOPIC")
 
 sc = SparkContext(appName="PythonTweetCleaner")
 sc.setLogLevel("WARN")
@@ -37,6 +42,24 @@ kafkaStream = KafkaUtils.createStream(ssc, zookeeper_url, 'spark-streaming',
                                       {kafka_topic: 1}, kafka_params)
 
 
+# output stream
+try:
+    kafka = SimpleClient("192.168.99.100:9092")
+except KafkaUnavailableError as e:
+    logging.error("Could not connect to Kafka")
+    raise e
+
+producer = SimpleProducer(kafka)
+
+def handler(message):
+    cleaned_tweets = message.collect()
+    try:
+        for tweet in cleaned_tweets:
+            producer.send_messages(output_topic, json.dumps(tweet).encode('utf-8'))
+    except FailedPayloadsError:
+        logging.error("Could not connect to Kafka")
+
+
 def get_line_sentiment(line):
     word_sentiments = list(map(lambda word: sentiment_data.get(word, 0), line["cleaned"].split(" ")))
     line_sentiment = sum(word_sentiments) / len(word_sentiments)
@@ -46,6 +69,7 @@ def get_line_sentiment(line):
 lines = kafkaStream.map(lambda x: json.loads(x[1])) \
     .map(get_line_sentiment)
 
+lines.foreachRDD(handler)  # send cleaned tweets to kafka
 lines.pprint()
 
 ssc.start()
