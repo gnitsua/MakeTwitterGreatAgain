@@ -4,6 +4,7 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+require('dotenv').config();
 
 var index = require('./routes/index');
 var users = require('./routes/users');
@@ -11,7 +12,7 @@ var users = require('./routes/users');
 var Sequelize = require('sequelize');
 var sequelize = new Sequelize('replies', 'user', 'pass',
   {
-    host: "192.168.99.100",
+    host: process.env.MYSQL_HOST,
     dialect: 'mysql',
     define: {
       timestamps: false,
@@ -41,8 +42,10 @@ sequelize.sync()
 // });
 
 var kafka = require('kafka-node')
+
+kafka_url = process.env.KAFKA_HOST + ":" + process.env.KAFKA_PORT
 var Consumer = kafka.Consumer
-var client = new kafka.Client("192.168.99.100:2181/")
+var client = new kafka.Client(kafka_url)
 var consumer = new Consumer(
   client,
   [],
@@ -54,9 +57,11 @@ consumer.on('message', function (message) {
 });
 
 consumer.addTopics([
-  { topic: "replies_sentiment", partition: 0, offset: 0 }
-],
-  function(){console.log("topic added to consumer for listening")}
+    { topic: "replies_sentiment", partition: 0, offset: 0 }
+  ],
+  function () {
+    console.log("topic added to consumer for listening")
+  }
 )
 ;
 

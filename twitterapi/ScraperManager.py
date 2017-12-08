@@ -9,7 +9,6 @@ from kafka import SimpleClient
 from kafka import SimpleProducer
 from kafka.errors import KafkaUnavailableError
 
-
 class ScraperManger:
     def __init__(self):
         config = ConfigReader("config.json")
@@ -20,11 +19,10 @@ class ScraperManger:
         self.rate_limit = config.get_key("RATE_LIMIT")
         self.scrapers = []
         kafka_url = "{:s}:{:s}".format(config.get_key("KAFKA_HOST"), config.get_key("KAFKA_PORT"))
-
         try:
-            kafka = SimpleClient(kafka_url)
+            kafka = SimpleClient(kafka_url,timeout=60)
         except KafkaUnavailableError as e:
-            logging.error("Could not connect to Kafka")
+            logging.error("Could not connect to Kafka2")
             raise e
 
         self.producer = SimpleProducer(kafka)

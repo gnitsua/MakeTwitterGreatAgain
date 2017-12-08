@@ -1,0 +1,34 @@
+version: '3'
+services:
+  scraper:
+    build: twitterapi/.
+    image: twitterapi
+    restart: always
+    command: python main.py
+  cleaner:
+    build: pythontweetcleaner/.
+    image: pythontweetcleaner
+    command: python main.py
+    depends_on:
+      - scraper
+  classifier:
+    build: afinnclassifier/.
+    image: afinnclassifier
+    command: python main.py
+    depends_on:
+      - cleaner
+  db:
+    image: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: 'pass'
+      MYSQL_DATABASE: 'replies'
+      MYSQL_USER: 'user'
+      MYSQL_PASSWORD: 'pass'
+    volumes:
+      - ./database/data/msql:/var/lib/mysql
+  datasink:
+    build: ./nodedatabaseadapter
+    image: nodedatabaseadapter
+    depends_on:
+      - db
+      - classifier

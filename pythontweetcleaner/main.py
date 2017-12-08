@@ -21,7 +21,7 @@ output_topic = config.get_key("KAFKA_OUTPUT_TOPIC")
 
 # input stream
 sc = SparkContext(appName="PythonTweetCleaner")
-sc.setLogLevel("WARN")
+sc.setLogLevel("ERROR")
 ssc = StreamingContext(sc, 10)
 
 kafka_params = {"startingOffsets": "earliest"}

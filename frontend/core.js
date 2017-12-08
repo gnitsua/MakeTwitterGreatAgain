@@ -47,52 +47,18 @@ var twitter = new Twitter({
   access_token_secret: process.env.ACCESS_TOKEN_SECRET
 });
 
-function checkTrump() {
-  var params = { screen_name: 'realDonaldTrump' };
-  twitter.get('statuses/user_timeline', params, function (error, tweets, response) {
-    if (!error) {
-      console.log('Retrieving trump tweets');
-      var length = tweets.length;
-      for (var i = 0; i < length; i++) {
-        var tweet = { tweet_id: tweets[i].id, text: tweets[i].text };
-        var cleanedTweet = tweets[i].text.replace(/[^A-Za-z 0-9 \.,\?""!@#\$%\^&\*\(\)-_=\+;:<>\/\\\|\}\{\[\]`~]*/g, '');
-        tweet.text = cleanedTweet;
-        if (tweet.text.match(/^RT.*/g) == null) {
-          (function (scopedTweet) {
-            database.select('trump', 'tweet_id=' + scopedTweet["tweet_id"], null, null, null, function (row) {
-              if (row.length == 0) {//this means we don't have this tweet in the db
-                database.insert('trump', scopedTweet);//TODO: potential issue if the tweet contains characters that aren't supported by mysql
-                //eventEmitter.emit('gotTrumpTweet',scopedTweet);//TODO:this is causing replies to be checked a million times right now
-                //console.log(scopedTweet)
-              }
-              else {
-                console.log("Already added this tweet");
-              }
-            });
-          })(tweet);
-        }
-      }
-    }
-    else {
-      console.log("twitter error");
-    }
-  });
-}
-
-//Event listeners
-eventEmitter.on('timeToGetTrumpTweet', function () {
-  checkTrump();
-});
-
-
 app.use('/static', express.static('public'));
 
 app.get('/', function (req, res) {
   res.sendFile(path.join(__dirname + '/index.html'));
 });
 
+app.get('/about.html', function (req,res) {
+  res.sendFile(path.join(__dirname + '/about.html'));
+})
+
 app.get('/trumpTweet', function (req, res) {
-  if (isNaN(req.query.page) == false) {
+  if (isNaN(req.query.page) === false) {
     limit1 = (parseInt(req.query.page) - 1) * 10;
     limit2 = 10;
     var params = { screen_name: 'realDonaldTrump', count: 10, include_rts: false };
