@@ -4,10 +4,10 @@ require('dotenv').config()
 function Database(){
 	var pool      =    mysql.createPool({
     	connectionLimit : 100, //important
-    	host     : 'localhost',
+    	host     : '192.168.99.100',
     	user     : process.env.DB_USR,
     	password : process.env.DB_PASS,
-    	database : 'twitter',
+    	database : 'replies',
     	debug    :  false
 	});
 	Database.prototype.select = function(table,where,order,limit1,limit2,callback) {
@@ -168,7 +168,7 @@ function Database(){
           		return;
         	} 
         	else{
-				query = 'SELECT AVG(sed) AS average FROM '+table;
+				query = 'SELECT AVG(sentiment) AS average FROM '+table;
 				if(where !== null){
 					query += ' WHERE ' + where;
 				}
@@ -192,12 +192,12 @@ function Database(){
           		return;
         	} 
         	else{
-				console.log("inserting");
+				console.log(data);
 				//console.log(data);
 				con.query(data, function(err,res){
 					con.release();
   					if(err) throw err;
-					console.log('Last insert ID:', res.insertId);
+					console.log('Last query ID:', res.insertId);
 					if(callback !== undefined){
 						callback(res.insertId);
 					}

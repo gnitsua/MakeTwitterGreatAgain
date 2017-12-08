@@ -55,73 +55,73 @@ function initTraining(app,database){
 		}
 	});
 
-	app.get('/tfidf',function(req,res){
-		console.log("TFIDF Calculate")
-		database.select('replies','sed_training is not null',null,0,1000,function(row){
-			var data = {"positive":{},"negative":{}};
-			positive_tfidf = new TfIdf();
-			negative_tfidf = new TfIdf();
-			console.log("TFIDI of "+row.length+" documents")
-			for(i=0;i<row.length;i++){
-				if(row[i].sed > 0 && row[i].sed_training < 0){//only add document that have been marked as classified incorrectly
-					negative_tfidf.addDocument(row[i].text);
-				}
-				if(row[i].sed < 0 && row[i].sed_training > 0){
-					positive_tfidf.addDocument(row[i].text);
-				}
-			}
-			console.log("positive docs: " +positive_tfidf.documents.length);
-			for(i=0;i<positive_tfidf.documents.length;i++){//get the list of terms for all positive documents
-				positive_tfidf.listTerms(i).forEach(function(term) {
-					if(term["weight"]>3 && term["term"].length<40){//had to add the length limit because the database won't take words that long
-						if(term["term"] in data["positive"]){//we already have this word so average
-							data["positive"][term["term"]] += 1;
-						}
-						else{//this is the first time we've seen this word
-							data["positive"][term["term"]] = 1;
-						}
-					}
-				});
-			}
-			console.log("negative docs: " +negative_tfidf.documents.length);
-			for(i=0;i<negative_tfidf.documents.length;i++){//get the list of terms for all negative documents
-				negative_tfidf.listTerms(i).forEach(function(term) {
-					if(term["tfidf"]>3){
-						if(term["term"] in data["negative"]){//we already have this word so average
-							data["negative"][term["term"]] += 1;
-						}
-						else{//this is the first time we've seen this word
-							data["negative"][term["term"]] = 1;
-						}
-					}
-				});
-			}
-			for(var key in data["positive"]){//check if any word that is in positive is in negative
-				if(key in data["negative"]){//if a word is in both lists we aren't interested in it
-					console.log("in both lists: " + key);
-					delete data["negative"][String(key)];//had to the add the String() because some of our terms could be numbers and javscript can't tell the difference between a number key and an index
-					delete data["positive"][String(key)];
-
-				}
-				else{//otherwise let's save it in the database
-					database.replace('user_words',{term:key,sed:3,weight:data["positive"][key]});
-				}
-			}
-			for(var key in data["negative"]){//check if any word that is in negative is in postive
-				if(key in data["positive"]){
-					console.log("in both lists: " + key);
-					delete data["positive"][String(key)];//had to the add the String() because some of our terms could be numbers and javscript can't tell the difference between a number key and an index
-					delete data["negative"][String(key)];
-
-				}
-				else{//otherwise let's save it in the database
-					database.replace('user_words',{term:key,sed:-3,weight:data["negative"][key]});
-				}
-			}
-			res.send(data);
-		});
-	});
-}
+// 	app.get('/tfidf',function(req,res){
+// 		console.log("TFIDF Calculate")
+// 		database.select('replies','sed_training is not null',null,0,1000,function(row){
+// 			var data = {"positive":{},"negative":{}};
+// 			positive_tfidf = new TfIdf();
+// 			negative_tfidf = new TfIdf();
+// 			console.log("TFIDI of "+row.length+" documents")
+// 			for(i=0;i<row.length;i++){
+// 				if(row[i].sed > 0 && row[i].sed_training < 0){//only add document that have been marked as classified incorrectly
+// 					negative_tfidf.addDocument(row[i].text);
+// 				}
+// 				if(row[i].sed < 0 && row[i].sed_training > 0){
+// 					positive_tfidf.addDocument(row[i].text);
+// 				}
+// 			}
+// 			console.log("positive docs: " +positive_tfidf.documents.length);
+// 			for(i=0;i<positive_tfidf.documents.length;i++){//get the list of terms for all positive documents
+// 				positive_tfidf.listTerms(i).forEach(function(term) {
+// 					if(term["weight"]>3 && term["term"].length<40){//had to add the length limit because the database won't take words that long
+// 						if(term["term"] in data["positive"]){//we already have this word so average
+// 							data["positive"][term["term"]] += 1;
+// 						}
+// 						else{//this is the first time we've seen this word
+// 							data["positive"][term["term"]] = 1;
+// 						}
+// 					}
+// 				});
+// 			}
+// 			console.log("negative docs: " +negative_tfidf.documents.length);
+// 			for(i=0;i<negative_tfidf.documents.length;i++){//get the list of terms for all negative documents
+// 				negative_tfidf.listTerms(i).forEach(function(term) {
+// 					if(term["tfidf"]>3){
+// 						if(term["term"] in data["negative"]){//we already have this word so average
+// 							data["negative"][term["term"]] += 1;
+// 						}
+// 						else{//this is the first time we've seen this word
+// 							data["negative"][term["term"]] = 1;
+// 						}
+// 					}
+// 				});
+// 			}
+// 			for(var key in data["positive"]){//check if any word that is in positive is in negative
+// 				if(key in data["negative"]){//if a word is in both lists we aren't interested in it
+// 					console.log("in both lists: " + key);
+// 					delete data["negative"][String(key)];//had to the add the String() because some of our terms could be numbers and javscript can't tell the difference between a number key and an index
+// 					delete data["positive"][String(key)];
+//
+// 				}
+// 				else{//otherwise let's save it in the database
+// 					database.replace('user_words',{term:key,sed:3,weight:data["positive"][key]});
+// 				}
+// 			}
+// 			for(var key in data["negative"]){//check if any word that is in negative is in postive
+// 				if(key in data["positive"]){
+// 					console.log("in both lists: " + key);
+// 					delete data["positive"][String(key)];//had to the add the String() because some of our terms could be numbers and javscript can't tell the difference between a number key and an index
+// 					delete data["negative"][String(key)];
+//
+// 				}
+// 				else{//otherwise let's save it in the database
+// 					database.replace('user_words',{term:key,sed:-3,weight:data["negative"][key]});
+// 				}
+// 			}
+// 			res.send(data);
+// 		});
+// 	});
+// }
 
 function renderWordlist(res,data){
 	var html = "<!DOCTYPE html>"+
