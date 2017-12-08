@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" href="/static/icon.png">
+  <title>Make Twitter Great Again</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script>
+    var trump_tweet_id = 0;
+    var trump_tweets;
+    var page = 0;
+
+    function aboutMe() {
+      var string = "The aim of this project was to incorporate machine learning semantic analysis on a Twitter account or any social media platform that relies on a textual medium of conversion. We chose to do Twitter because current events led us to wonder the overall opinion of the web on President Donald Trump's tweets. His tweets have a widespread influence on the world and are read by thousands of people each day so learning about the consensus on his tweets can help mold the opinions of others."
+      document.getElementById("overall").innerHTML = string;
+    }
+
+    function train(tweet_id, sed) {
+      $.post("/train", { tweet_id: tweet_id, sed_training: sed });
+    }
+
+    function takeMeHome() {
+      var temp = "<div class='container-fluid bg-1 text-center' id='container1'>" + "<img src='http://49.media.tumblr.com/3a70f0cb0a934cf8684e5822cead95c7/tumblr_o3ko2kKZfX1s2wlrxo1_540.gif' class='img-responsive img-circle margin' style='display:inline' width='350' height='350'>" + "<div id='tweet'><h4>'Anyone who thinks my story is anywhere near over is sadly mistaken.'</h4></div>" + "<h5><i> - @realDonaldTrump via Twitter </i></h5> </div>" + "<div class='container-fluid bg-2 text-center'>" + "<h3 class='margin'>Retweets</h3><br>" + "<div class='row'>" + " <div class='col-sm-12'> <div id='graph'> </div> </div> </div> </br> <div class='row'> <div> <div style='width: 50%;float:left' class='panel-group' id='accordion'> <h4><b> Positive Tweets </b></h4> <div id='pos-tweets' style='width:80%;margin-left:auto;margin-right:auto;'> </div> </div> </div> <div> <div style='width: 49%;float:right' class='panel-group' id='accordion2'> <h4><b> Negative Tweets </b></h4> <div id='neg-tweets' style='width:80%;margin-left:auto;margin-right:auto;'> </div> </div> </div> </div> </div>"
+      document.getElementById("overall").innerHTML = temp;
+      initHome();
+    }
+
+    function increaseTweet() {
+      if (page == 9) {
+        page = 9;
+      }
+      else {
+        page = page + 1;
+      }
+      document.getElementById("tweet").innerHTML = trump_tweets[page].text;
+      getReplies(trump_tweets[page].id);
+      getSentiment(trump_tweets[page].id)
+    }
+
+    function decreaseTweet() {
+      if (page == 0) {
+        page = 0;
+      }
+      else {
+        page = page - 1;
+      }
+      document.getElementById("tweet").innerHTML = trump_tweets[page].text;
+      getReplies(trump_tweets[page].id);
+      getSentiment(trump_tweets[page].id)
+    }
+
+    function train(tweet_id, sed) {
+      $.post("/train", { tweet_id: tweet_id, sed_training: sed });
+    }
+
+    function initHome() {
+      var URL = "trumpTweet?page=1"
+
+      $.ajax({
+        type: "GET",
+        url: URL,
+        contentType: "application/json; charset=utf-8",
+        data: "{}",
+        dataType: "json",
+
+        success: function (msg) {
+          document.getElementById("tweet").innerHTML = msg[0].text;//initially display the first tweet
+          trump_tweets = msg;
+          getReplies(msg[0].id)
+          getSentiment(msg[0].id)
+          //var percent = Math.round(parseFloat(msg[t].sed) * 100.0);
+          //var percent = Math.round(((msg[t].sed+5)/10)*100);//temperary reducing range to make it more exciting. could result in an outofbounds
+          //console.log(percent);
+          //var s = "<div class='progress'>" + "<div class='progress-bar progress-bar-primary' role='progressbar' style='width:" + percent + "%'>" + percent + "%" + "</div>" + "<div class='progress-bar progress-red' role='progressbar' style='width:" + (100 - percent) + "%'>" + (100 - percent) + "%" + "</div>" + "</div>"
+          //document.getElementById("graph").innerHTML = s;
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+          document.getElementById("pos-tweets").innerHTML = "Error fetching trump: " + URL;
+        }
+      });
+    }
+
+    function getReplies(tweet_id) {
+      var URL2 = "replies?tweet_id=" + tweet_id + "&page=1"
+      $.ajax({
+        type: "GET",
+        url: URL2,
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function (msg) {
+          var json = msg["data"];
+          strp = "";
+          strn = "";
+          for (i = 0; i < json.length; i++) {
+            var tweet_id = json[i].id;
+            var tweet = json[i].full_text
+            var val = json[i].sentiment
+            if (val > 0 || val == null) {
+              strp += "<div class='panel panel-primary'>" + "<div class='panel-heading highlight'>" + "<h4 class='panel-title'><span class='glyphicon glyphicon-plus' onclick='train(" + tweet_id + ",1);this.className += \" text-danger\";'></span> <a class='accordion-toggle' data-toggle='collapse' data-parent='#accordion' href='#collapse" + i + "'>  Tweet " + (i + 1) + "</a> <span class='glyphicon glyphicon-minus' onclick='train(" + tweet_id + ",-1);this.className += \" text-danger\";'></span> </h4> </div>" + "<div id='collapse" + i + "' class='panel-collapse collapse in'> <div class='panel-body'> " + tweet + " </div>" + "</div></div>"
+
+            }
+            else if (val < 0) {
+              strn += "<div class='panel panel-primary'>" + "<div class='panel-heading highlight' style='background:#ff4f42;'>" + "<h4 class='panel-title'><span class='glyphicon glyphicon-plus' onclick='train(" + tweet_id + ",-1);this.className += \" text-primary\";'></span> <a class='accordion-toggle' data-toggle='collapse' data-parent='#accordion' href='#collapse" + i + "'>  Tweet " + (i + 1) + "</a> <span class='glyphicon glyphicon-minus' onclick='train(" + tweet_id + ",1);this.className += \" text-primary\";'></span> </h4> </div>" + "<div id='collapse" + i + "' class='panel-collapse collapse in'> <div class='panel-body'> " + tweet + " </div>" + "</div></div>";
+
+            }
+            else {
+              //alert("Somethings up")
+            }
+          }
+          document.getElementById("pos-tweets").innerHTML = strp;
+          document.getElementById("neg-tweets").innerHTML = strn;
+          document.getElementById("retweetNum").innerHTML = "(" + msg.quota_max + ")";
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+          document.getElementById("pos-tweets").innerHTML = "Error fetching replies: " + URL;
+        }
+      });
+    }
+
+    function getSentiment(tweet_id) {
+      var URL2 = "sentiment?tweet_id=" + tweet_id
+      $.ajax({
+        type: "GET",
+        url: URL2,
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function (msg) {
+          var value = parseFloat(msg['sentiment'])
+          console.log(value);
+          console.log(value)
+          if(value > 100){
+            value = 100
+          }
+          else if(value < 0){
+            value = 0
+          }
+          $('#progressbar').attr('aria-valuenow', value).css('width',value+'%');
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+          console.log("error fetching sentiment");
+        }
+      });
+    }
+
+    $(document).ready(initHome());
+  </script>
+  <style>
+    body {
+      font: 20px Montserrat, sans-serif;
+      line-height: 1.8;
+      color: #CAD4CE;
+      border: 45px solid white;
+    }
+
+    p {
+      font-size: 16px;
+    }
+
+    .margin {
+      margin-bottom: 20px;
+    }
+
+    .bg-1 {
+      background-color: #FF4F42; /* Red */
+      color: #ffffff;
+    }
+
+    .bg-2 {
+      background-color: #474e5d; /* Dark Blue */
+      color: #ffffff;
+    }
+
+    .bg-3 {
+      background-color: #ffffff; /* White */
+      color: #555555;
+    }
+
+    .bg-4 {
+      background-color: #2f2f2f; /* Black Gray */
+      color: #fff;
+    }
+
+    .container-fluid {
+      padding-top: 70px;
+      padding-bottom: 70px;
+    }
+
+    .navbar {
+      padding-top: 15px;
+      padding-bottom: 15px;
+      border: 0;
+      border-radius: 0;
+      margin-bottom: 0;
+      font-size: 12px;
+      letter-spacing: 5px;
+    }
+
+    .navbar-nav li a:hover {
+      color: #1abc9c !important;
+    }
+
+    #container1 h3 a:link {
+      color: #777777;
+      background-color: transparent;
+      text-decoration: none;
+    }
+
+    #container1 h3 a:hover {
+      color: #1abc9c;
+      background-color: transparent;
+      text-decoration: none;
+    }
+
+    .progress {
+      height: 75px;
+      border: 1px solid #474e5d;
+    }
+
+    .progress-red {
+      background-color: #ff4f42;
+    }
+
+    img.resize {
+      width: 50%;
+      height: 50%;
+    }
+
+    .panel-success .panel-heading {
+      background-color: #ff4f42;
+      color: white;
+    }
+
+    .panel-success .panel-title {
+      color: white;
+    }
+
+    .panel-success .panel-body {
+      color: black;
+    }
+
+    .panel-primary .panel-body {
+      color: black;
+    }
+
+    .panel-body {
+      color: black;
+      word-wrap: break-word;
+    }
+
+    .panel-heading .accordion-toggle:after {
+      /* symbol for "opening" panels */
+      font-family: 'Glyphicons Halflings'; /* essential for enabling glyphicon */
+      content: "\e113"; /* adjust as needed, taken from bootstrap.css */
+      float: right; /* adjust as needed */
+      color: black; /* adjust as needed */
+    }
+
+    .panel-heading .accordion-toggle.collapsed:after {
+      /* symbol for "collapsed" panels */
+      content: "\e114"; /* adjust as needed, taken from bootstrap.css */
+      color: white;
+    }
+
+    .accordion-toggle:hover {
+      text-decoration: none;
+    }
+
+    #accordion .highlight {
+
+      color: white;
+      transition: background 2s ease;
+    }
+
+    .panel .panel-heading .highlight .negative {
+      background: #ff4f42;
+    }
+
+    .panel .panel-heading:hover {
+      background: grey;
+      color: white;
+    }
+  </style>
+
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-default">
+  <a class="navbar-brand" href="#" onclick="takeMeHome()">TRUMP'S GREAT TWEETS</a>
+  <ul class="nav navbar-nav navbar-right" style="padding-left:15px;padding-right:20px;">
+    <li><a href="#" onclick="aboutMe()">ABOUT</a></li>
+  </ul>
+</nav>
+
+<div class="container-fluid bg-1 text-center" id="overall" style="padding-left:0px;padding-right:0px;">
+  <!-- First Container -->
+  <div class="container-fluid bg-1 text-center" id="container1">
+    <img src="http://49.media.tumblr.com/3a70f0cb0a934cf8684e5822cead95c7/tumblr_o3ko2kKZfX1s2wlrxo1_540.gif"
+         class="img-responsive img-circle margin" style="display:inline" width="350" height="350">
+    <div>
+      <table style="width:100%;">
+        <tr>
+          <td class="glyphicon glyphicon-chevron-left" aria-hidden="true" onclick="decreaseTweet()" width="100px"
+              height="50px" style="margin-top: 50px;"></td>
+          <td align="center" width="80%">
+            <div id="tweet">
+              <h4>"Anyone who thinks my story is anywhere near over is sadly mistaken."</h4>
+            </div>
+            <h5><i> - @realDonaldTrump via Twitter </i></h5>
+          </td>
+          <td class="glyphicon glyphicon-chevron-right" aria-hidden="true" onclick="increaseTweet()" width="100px"
+              height="50px" style="margin-top: 50px;"></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- Second Container (Grid) -->
+  <div class="container-fluid bg-2 text-center">
+    <h3>Retweets</h3>
+    <h5 id="retweetNum">(100)</h5>
+    <div class="row" style="margin-top: 30px;">
+      <div class="col-sm-12">
+        <div id="graph">
+          <div class='progress'>
+            <div class="progress" style="background: #FF4F42">
+              <div id="progressbar" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" style="width: 50%;">
+                <span class="sr-only">60% Complete</span>
+              </div>
+            </div>
+            <!--<div class='progress-bar progress-bar-primary' role='progressbar' style='width:" + percent + "%'>" + percent-->
+              <!--+ "%" + "-->
+            <!--</div>-->
+            <!--" + "-->
+            <!--<div class='progress-bar progress-red' role='progressbar' style='width:" + (100 - percent) + "%'>" + (100 - -->
+              <!--percent) + "%" + "-->
+            <!--</div>-->
+            <!--" + "-->
+          </div>
+        </div>
+      </div>
+    </div>
+    </br>
+    <div class="row">
+      <div>
+        <div style="width: 50%;float:left" class="panel-group" id="accordion">
+          <h4><b> Positive Tweets </b></h4>
+          <div id="pos-tweets" style="width:80%;margin-left:auto;margin-right:auto;">
+          </div>
+        </div>
+      </div>
+      <div>
+        <div style="width: 49%;float:right" class="panel-group" id="accordion2">
+          <h4><b> Negative Tweets </b></h4>
+          <div id="neg-tweets" style="width:80%;margin-left:auto;margin-right:auto;">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+
+  function toggleChevron(e) {
+    var theAccordion = $(this).closest('.panel-group');
+    $(e.target)
+      .prev('.panel-heading')
+      .find('i.indicator')
+      .toggleClass('glyphicon-minus glyphicon-plus');
+    theAccordion.find('.panel-heading').removeClass('highlight');
+    $(e.target).prev('.panel-heading').addClass('highlight');
+  }
+
+  $('.panel-group').on('hidden.bs.collapse', toggleChevron);
+  $('.panel-group').on('shown.bs.collapse', toggleChevron);
+
+</script>
+<!-- Footer -->
+<footer class="container-fluid bg-3 text-center">
+  <p>Project Made By: Austin Gentry, Vraj Patel, Justin Petrecz, and Brandon Tran</p>
+</footer>
+<!-- Start of StatCounter Code for Default Guide -->
+<a title="web stats"
+   href="http://statcounter.com/" target="_blank"><img
+    class="statcounter"
+    src="//c.statcounter.com/11271334/0/d7d0919b/1/" alt="web
+		stats"></a>
+<!-- End of StatCounter Code for Default Guide -->
+</body>
+</html>
