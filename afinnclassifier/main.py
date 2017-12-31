@@ -29,6 +29,7 @@ except ValueError:
 config = ConfigReader("config.json")
 
 zookeeper_url = "{:s}:{:s}".format(config.get_key("ZOOKEEPER_HOST"), config.get_key("ZOOKEEPER_PORT"))
+kafka_url = "{:s}:{:s}".format(config.get_key("KAFKA_HOST"), config.get_key("KAFKA_PORT"))
 kafka_topic = config.get_key("KAFKA_TOPIC")
 output_topic = config.get_key("KAFKA_OUTPUT_TOPIC")
 
@@ -44,7 +45,7 @@ kafkaStream = KafkaUtils.createStream(ssc, zookeeper_url, 'spark-streaming',
 
 # output stream
 try:
-    kafka = SimpleClient("192.168.99.100:9092")
+    kafka = SimpleClient(kafka_url)
 except KafkaUnavailableError as e:
     logging.error("Could not connect to Kafka")
     raise e

@@ -1,34 +1,30 @@
-version: '3'
+version: '2'
 services:
   scraper:
     build: twitterapi/.
     image: twitterapi
-    restart: always
+    networks:
+      - kafka_internal-net
     command: python main.py
   cleaner:
     build: pythontweetcleaner/.
     image: pythontweetcleaner
-    command: python main.py
-    depends_on:
-      - scraper
+    networks:
+      - kafka_internal-net
+    environment:
+     - ENABLE_INIT_DAEMON=false
+    command: sh app/submit.sh
   classifier:
     build: afinnclassifier/.
     image: afinnclassifier
+    networks:
+      - kafka_internal-net
     command: python main.py
-    depends_on:
-      - cleaner
-  db:
-    image: mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: 'pass'
-      MYSQL_DATABASE: 'replies'
-      MYSQL_USER: 'user'
-      MYSQL_PASSWORD: 'pass'
-    volumes:
-      - ./database/data/msql:/var/lib/mysql
   datasink:
     build: ./nodedatabaseadapter
     image: nodedatabaseadapter
-    depends_on:
-      - db
-      - classifier
+    networks:
+      - kafka_internal-net
+networks:
+  kafka_internal-net:
+    external: true

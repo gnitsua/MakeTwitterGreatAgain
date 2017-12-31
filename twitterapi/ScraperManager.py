@@ -20,9 +20,9 @@ class ScraperManger:
         self.scrapers = []
         kafka_url = "{:s}:{:s}".format(config.get_key("KAFKA_HOST"), config.get_key("KAFKA_PORT"))
         try:
-            kafka = SimpleClient(kafka_url,timeout=60)
+            kafka = SimpleClient(kafka_url,timeout=5)
         except KafkaUnavailableError as e:
-            logging.error("Could not connect to Kafka2")
+            logging.error("Could not connect to Kafka")
             raise e
 
         self.producer = SimpleProducer(kafka)

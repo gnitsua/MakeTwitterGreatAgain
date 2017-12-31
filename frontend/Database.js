@@ -4,7 +4,7 @@ require('dotenv').config()
 function Database(){
 	var pool      =    mysql.createPool({
     	connectionLimit : 100, //important
-    	host     : '192.168.99.100',
+    	host     : '172.17.0.1',
     	user     : process.env.DB_USR,
     	password : process.env.DB_PASS,
     	database : 'replies',

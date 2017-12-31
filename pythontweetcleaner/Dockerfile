@@ -1,8 +1,5 @@
-FROM jupyter/pyspark-notebook
+FROM bde2020/spark-python-template:2.2.0-hadoop2.7
 
-RUN pip install kafka
+ENV SPARK_APPLICATION_PYTHON_LOCATION /app/main.py
 
-ADD . /pythontweetcleaner/
-WORKDIR /pythontweetcleaner
-
-CMD ["python", "main.py"]
+CMD sh submit.sh

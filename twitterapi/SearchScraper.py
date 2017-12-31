@@ -2,7 +2,7 @@ import json
 from threading import Timer
 import logging
 from kafka.errors import FailedPayloadsError
-
+import tweepy
 
 class SearchScraper():
     def __init__(self, name, search_string, rate_limit, api, producer):
@@ -14,10 +14,13 @@ class SearchScraper():
         self.producer = producer
 
     def get_tweets(self):
-        results = self.api.search(q=self.search_string, results_type="recent", count=100, tweet_mode="extended")
+        try:
+            results = self.api.search(q=self.search_string, results_type="recent", count=100, tweet_mode="extended")
+        except tweepy.TweepError as e:
+            logging.error("Could not connect to Twitter")
         try:  # if the kafka connection is broken, stop trying to send and hope that ScraperManager can reconnect
+            print("got " + str(len(results)) + " tweets")
             for result in results:
-                logging.debug(result._json)
                 self.producer.send_messages(self.name, json.dumps(result._json).encode('utf-8'))
         except FailedPayloadsError:
             logging.error("Could not connect to Kafka")

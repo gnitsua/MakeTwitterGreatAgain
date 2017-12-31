@@ -13,29 +13,29 @@ from kafka.errors import KafkaUnavailableError
 from kafka.errors import FailedPayloadsError
 from ConfigReader import ConfigReader
 
-config = ConfigReader("config.json")
+config = ConfigReader("app/config.json")
 zookeeper_url = "{:s}:{:s}".format(config.get_key("ZOOKEEPER_HOST"), config.get_key("ZOOKEEPER_PORT"))
 kafka_url = "{:s}:{:s}".format(config.get_key("KAFKA_HOST"), config.get_key("KAFKA_PORT"))
 kafka_topic = config.get_key("KAFKA_TOPIC")
 output_topic = config.get_key("KAFKA_OUTPUT_TOPIC")
 
+print("imports")
 # input stream
 sc = SparkContext(appName="PythonTweetCleaner")
 sc.setLogLevel("ERROR")
 ssc = StreamingContext(sc, 10)
 
 kafka_params = {"startingOffsets": "earliest"}
-kafkaStream = KafkaUtils.createStream(ssc, zookeeper_url, 'spark-streaming',
-                                      {kafka_topic: 1}, kafka_params)
+kafkaStream = KafkaUtils.createStream(ssc, zookeeper_url, 'spark-streaming',{kafka_topic: 1},kafka_params)
+
 # output stream
 try:
-    kafka = SimpleClient("192.168.99.100:9092")
+    kafka = SimpleClient(kafka_url)
 except KafkaUnavailableError as e:
     logging.error("Could not connect to Kafka")
     raise e
 
 producer = SimpleProducer(kafka)
-
 
 def handler(message):
     cleaned_tweets = message.collect()
