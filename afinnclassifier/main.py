@@ -14,7 +14,7 @@ from kafka.errors import KafkaUnavailableError
 from kafka.errors import FailedPayloadsError
 
 try:
-    with open("data/AFINN-96.txt") as file:
+    with open("app/data/AFINN-96.txt") as file:#TODO: move this to the config
         sentiment_data = dict(csv.reader(file, delimiter='\t'))
     for key in sentiment_data:
         sentiment_data[key] = int(sentiment_data[key])
@@ -26,14 +26,14 @@ except ValueError:
     logging.error("Sentiment data file not valid")
     exit(1)
 
-config = ConfigReader("config.json")
+config = ConfigReader("app/config.json")
 
 zookeeper_url = "{:s}:{:s}".format(config.get_key("ZOOKEEPER_HOST"), config.get_key("ZOOKEEPER_PORT"))
 kafka_url = "{:s}:{:s}".format(config.get_key("KAFKA_HOST"), config.get_key("KAFKA_PORT"))
 kafka_topic = config.get_key("KAFKA_TOPIC")
 output_topic = config.get_key("KAFKA_OUTPUT_TOPIC")
 
-sc = SparkContext(appName="PythonTweetCleaner")
+sc = SparkContext(appName="AfinnClassifier")
 sc.setLogLevel("ERROR")
 ssc = StreamingContext(sc, 10)
 

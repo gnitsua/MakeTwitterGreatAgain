@@ -43,7 +43,7 @@ sequelize.sync()
 
 var kafka = require('kafka-node')
 
-kafka_url = process.env.KAFKA_HOST + ":" + process.env.KAFKA_PORT
+kafka_url = process.env.ZOOKEEPER_HOST + ":" + process.env.ZOOKEEPER_PORT
 var Consumer = kafka.Consumer
 var client = new kafka.Client(kafka_url)
 var consumer = new Consumer(

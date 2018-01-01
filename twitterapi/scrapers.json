@@ -2,6 +2,6 @@
     {
         "name": "replies_raw",
         "search_string": "to:realDonaldTrump lang:en",
-        "rate_limit": 40
+        "rate_limit": 175
     }
 ]

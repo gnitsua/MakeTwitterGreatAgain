@@ -19,12 +19,21 @@ services:
     image: afinnclassifier
     networks:
       - kafka_internal-net
-    command: python main.py
+    environment:
+     - ENABLE_INIT_DAEMON=false
+    command: sh app/submit.sh
   datasink:
     build: ./nodedatabaseadapter
     image: nodedatabaseadapter
     networks:
       - kafka_internal-net
+  frontend:
+    build: ./frontend
+    image: frontend
+    networks:
+     - kafka_internal-net
+    ports:
+     - 8888:8080
 networks:
   kafka_internal-net:
     external: true

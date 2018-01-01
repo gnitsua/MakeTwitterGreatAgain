@@ -2,6 +2,8 @@ version: '2'
 services:
   db:
     image: mysql
+    networks:
+      - kafka_internal-net
     ports:
       - "3306:3306"
     environment:
@@ -11,3 +13,6 @@ services:
       MYSQL_PASSWORD: 'pass'
     volumes:
       - ./data/msql:/var/lib/mysql
+networks:
+  kafka_internal-net:
+    external: true
