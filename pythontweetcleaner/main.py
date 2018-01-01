@@ -55,13 +55,13 @@ def handler(message):
 lines = kafkaStream.map(lambda x: json.loads(x[1])) \
     .filter(lambda tweet: tweet["in_reply_to_status_id"] != None) \
     .filter(lambda tweet: tweet["truncated"] == False) \
-    .map(lambda line: {"created_at": line["created_at"], "full_text": line["full_text"],
+    .map(lambda line: {"id": line["id"], "created_at": line["created_at"], "full_text": line["full_text"],
                        "in_reply_to_status_id": line["in_reply_to_status_id"]}) \
     .map(lambda line: (line.update({"cleaned": line["full_text"].lower()}) or line)) \
     .map(lambda line: (line.update({"cleaned": ' '.join(
     re.sub("(@[A-Za-z0-9]+)|([^0-9A-Za-z \t])|(\w+:\/\/\S+)", " ", line["cleaned"]).split())}) or line))
 lines.foreachRDD(handler)  # send cleaned tweets to kafka
-lines.pprint()
+#lines.pprint()
 
 ssc.start()
 ssc.awaitTermination()

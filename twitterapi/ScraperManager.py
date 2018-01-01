@@ -3,7 +3,7 @@ from ConfigReader import ConfigReader
 import json
 import logging
 import tweepy
-from tweepy import OAuthHandler
+from tweepy import AppAuthHandler
 from threading import Timer
 from kafka import SimpleClient
 from kafka import SimpleProducer
@@ -14,8 +14,7 @@ class ScraperManger:
     def __init__(self):
         config = ConfigReader("config.json")
 
-        auth = OAuthHandler(config.get_key("CONSUMER_KEY"), config.get_key("CONSUMER_SECRET"))
-        auth.set_access_token(config.get_key("ACCESS_TOKEN_KEY"), config.get_key("ACCESS_TOKEN_SECRET"))
+        auth = AppAuthHandler(config.get_key("CONSUMER_KEY"), config.get_key("CONSUMER_SECRET"))
         self.api = tweepy.API(auth_handler=auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
         self.rate_limits = self.tweep_rate_limits_to_dictionary(self.api.rate_limit_status())
         self.scrapers = []

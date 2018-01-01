@@ -71,7 +71,7 @@ lines = kafkaStream.map(lambda x: json.loads(x[1])) \
     .map(get_line_sentiment)
 
 lines.foreachRDD(handler)  # send cleaned tweets to kafka
-lines.pprint()
+#lines.pprint()
 
 ssc.start()
 ssc.awaitTermination()

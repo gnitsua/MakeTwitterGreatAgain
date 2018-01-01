@@ -17,10 +17,15 @@ var sequelize = new Sequelize('replies', 'user', 'pass',
     define: {
       timestamps: false,
       charset: 'utf8mb4',
-    }
+    },
+    logging: false
   });
 
 const Reply = sequelize.define('reply', {
+  tweet_id: {
+    type: Sequelize.BIGINT,
+    unique: true
+  },
   created_at: Sequelize.DATE,
   full_text: Sequelize.TEXT,
   in_reply_to_status_id: Sequelize.BIGINT,
@@ -29,17 +34,6 @@ const Reply = sequelize.define('reply', {
 })
 
 sequelize.sync()
-
-//   .then(function() {
-//   return User.create({
-//     username: 'janedoe',
-//     birthday: new Date(1980, 6, 20)
-//   });
-// }).then(function(jane) {
-//   console.log(jane.get({
-//     plain: true
-//   }));
-// });
 
 var kafka = require('kafka-node')
 
@@ -67,10 +61,10 @@ consumer.addTopics([
 
 function handleMessage(message) {
   const reply = JSON.parse(message.value);
-  // extract key value from the Kafka message
-  Reply.create(reply);
-  // record the top3 for the continent indicated by the message key as current standing in the countrySizeStandings object
-}// handleMessage
+  Reply.create(reply).catch(Sequelize.ValidationError, function (err) {
+	console.log("duplicate tweet")
+  }).then("added tweet");
+}
 
 
 var app = express();
