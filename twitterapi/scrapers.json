@@ -1,6 +1,7 @@
 [
     {
         "name": "replies_raw",
+        "type": "/search/tweets",
         "search_string": "to:realDonaldTrump lang:en",
         "rate_limit": 20
     }
