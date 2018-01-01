@@ -61,7 +61,7 @@ app.get('/trumpTweet', function (req, res) {
   if (isNaN(req.query.page) === false) {
     limit1 = (parseInt(req.query.page) - 1) * 10;
     limit2 = 10;
-    var params = { screen_name: 'realDonaldTrump', count: 10, include_rts: false };
+    var params = { screen_name: 'realDonaldTrump', count: 10, include_rts: false, tweet_mode: "extended" };
     twitter.get('statuses/user_timeline', params, function (error, tweets, response) {
       if (!error) {
         res.send(tweets);

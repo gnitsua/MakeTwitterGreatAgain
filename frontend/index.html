@@ -36,7 +36,7 @@
       else {
         page = page + 1;
       }
-      document.getElementById("tweet").innerHTML = trump_tweets[page].text;
+      document.getElementById("tweet").innerHTML = trump_tweets[page].full_text;
       getReplies(trump_tweets[page].id);
       getSentiment(trump_tweets[page].id)
     }
@@ -48,7 +48,7 @@
       else {
         page = page - 1;
       }
-      document.getElementById("tweet").innerHTML = trump_tweets[page].text;
+      document.getElementById("tweet").innerHTML = trump_tweets[page].full_text;
       getReplies(trump_tweets[page].id);
       getSentiment(trump_tweets[page].id)
     }
@@ -68,7 +68,7 @@
         dataType: "json",
 
         success: function (msg) {
-          document.getElementById("tweet").innerHTML = msg[0].text;//initially display the first tweet
+          document.getElementById("tweet").innerHTML = msg[0].full_text;//initially display the first tweet
           trump_tweets = msg;
           getReplies(msg[0].id)
           getSentiment(msg[0].id)
